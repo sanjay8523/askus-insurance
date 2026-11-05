@@ -13,3 +13,4 @@ legacy/
 .env
 .env.*
 !.env.example
+cloudflare-pages.*

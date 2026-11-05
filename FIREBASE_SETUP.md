@@ -33,3 +33,10 @@ Console: https://console.firebase.google.com/project/askus-insurance/overview
   Only phone-verified users can get an upload signature. Staff view them in the Cloudinary Media Library.
 
 Staff read `documentRequests` in the Firebase console (or via an admin page / Cloud Function later).
+
+## Cloudflare Pages env (local files are gitignored, never commit them)
+- `cloudflare-pages.env`: plain variables (VITE_* + Cloudinary name/key + FIREBASE_PROJECT_ID). Add each under
+  Settings > Variables and Secrets (Production + Preview).
+- `cloudflare-pages.secrets.json`: only `CLOUDINARY_API_SECRET`. Upload once the Pages project exists:
+  `npx wrangler pages secret bulk cloudflare-pages.secrets.json --project-name <your-pages-project>`
+- Rebuild after changing any VITE_* variable (they are baked in at build time).

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 270" width="440" height="270">
+  <defs>
+    <linearGradient id="box" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.6" stop-color="#e6eaf0"/>
+      <stop offset="1" stop-color="#b3bbc7"/>
+    </linearGradient>
+    <linearGradient id="cab" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b82f0"/>
+      <stop offset="1" stop-color="#16408f"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#bfd8ee"/>
+      <stop offset="1" stop-color="#4a6a88"/>
+    </linearGradient>
+    <radialGradient id="rim" cx="0.4" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#f4f6f8"/>
+      <stop offset="0.6" stop-color="#aab1bb"/>
+      <stop offset="1" stop-color="#6e7682"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-300%" width="140%" height="700%"><feGaussianBlur stdDeviation="6"/></filter>
+    <g id="wheel">
+      <circle r="34" fill="#15171b"/>
+      <circle r="28" fill="#23262c"/>
+      <circle r="19" fill="url(#rim)"/>
+      <g stroke="#69717d" stroke-width="4" stroke-linecap="round">
+        <path d="M0 0 L0 -17"/><path d="M0 0 L16.2 -5.2"/><path d="M0 0 L10 13.8"/><path d="M0 0 L-10 13.8"/><path d="M0 0 L-16.2 -5.2"/>
+      </g>
+      <circle r="6" fill="#3a3f47"/>
+    </g>
+  </defs>
+  <ellipse cx="226" cy="250" rx="200" ry="10" fill="#0b1626" opacity="0.38" filter="url(#soft)"/>
+  <!-- cargo box -->
+  <path d="M22 60 H262 C268 60 272 64 272 70 V196 H22 Z" fill="url(#box)" stroke="#8c94a0" stroke-width="1.5"/>
+  <path d="M22 118 H272 V148 H22 Z" fill="url(#cab)"/>
+  <path d="M22 126 H272" stroke="#fff" stroke-width="2" opacity="0.5"/>
+  <g stroke="#9aa3af" stroke-width="1.5"><path d="M82 60 V196"/><path d="M142 60 V196"/><path d="M202 60 V196"/></g>
+  <path d="M30 68 H255" stroke="#fff" stroke-width="3" opacity="0.8" stroke-linecap="round"/>
+  <!-- chassis -->
+  <path d="M22 196 H400 V212 H22 Z" fill="#2a2e35"/>
+  <!-- cab -->
+  <path d="M276 196 V96 C276 80 286 72 302 72 H338 C356 72 368 82 376 100 L400 150 C406 160 408 168 408 180 V196 Z" fill="url(#cab)" stroke="#0f2f6b" stroke-width="1.5"/>
+  <path d="M296 90 H336 C348 90 358 98 364 112 L378 144 H296 Z" fill="url(#glass)" stroke="#0f2f6b"/>
+  <path d="M300 94 H322 L306 140 H298 Z" fill="#fff" opacity="0.28"/>
+  <path d="M298 150 V190" stroke="#0f2f6b" stroke-width="1.6"/>
+  <rect x="304" y="156" width="20" height="5" rx="2.5" fill="#d6dce6"/>
+  <path d="M396 160 H410 V182 H396 Z" fill="#1b1d22"/>
+  <path d="M386 150 C400 152 408 158 408 166 L386 164 Z" fill="#fffbe2" stroke="#8c94a0"/>
+  <path d="M276 106 L268 112 V132 L276 138 Z" fill="#d6dce6" stroke="#8c94a0"/>
+  <!-- mudguards and wheels -->
+  <circle cx="86" cy="214" r="42" fill="#0f1114"/>
+  <circle cx="156" cy="214" r="42" fill="#0f1114"/>
+  <circle cx="338" cy="214" r="42" fill="#0f1114"/>
+  <use href="#wheel" x="86" y="214"/>
+  <use href="#wheel" x="156" y="214"/>
+  <use href="#wheel" x="338" y="214"/>
+  <!-- lights -->
+  <rect x="18" y="170" width="6" height="18" rx="2" fill="#cf2a3a"/>
+</svg>

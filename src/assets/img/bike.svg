@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 270" width="440" height="270">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.5" stop-color="#e8ebef"/>
+      <stop offset="1" stop-color="#a7afbb"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f6fe0"/>
+      <stop offset="1" stop-color="#0f3f9a"/>
+    </linearGradient>
+    <radialGradient id="rim" cx="0.4" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#f4f6f8"/>
+      <stop offset="0.6" stop-color="#aab1bb"/>
+      <stop offset="1" stop-color="#6e7682"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-300%" width="140%" height="700%"><feGaussianBlur stdDeviation="5"/></filter>
+    <g id="wheel">
+      <circle r="34" fill="#15171b"/>
+      <circle r="28" fill="#23262c"/>
+      <circle r="20" fill="url(#rim)"/>
+      <g stroke="#69717d" stroke-width="4" stroke-linecap="round">
+        <path d="M0 0 L0 -18"/><path d="M0 0 L17 -5.5"/><path d="M0 0 L10.6 14.6"/><path d="M0 0 L-10.6 14.6"/><path d="M0 0 L-17 -5.5"/>
+      </g>
+      <circle r="6" fill="#3a3f47"/><circle r="2.5" fill="#c9ced6"/>
+    </g>
+  </defs>
+  <ellipse cx="220" cy="238" rx="170" ry="9" fill="#0b1626" opacity="0.38" filter="url(#soft)"/>
+  <!-- exhaust -->
+  <path d="M70 196 H170 C176 196 178 204 172 208 H70 C62 208 62 196 70 196 Z" fill="#8f97a3" stroke="#5f6772"/>
+  <!-- rear body -->
+  <path d="M52 204 C40 160 58 118 112 104 L214 98 C232 98 240 112 234 132 L218 186 L170 204 Z" fill="url(#body)" stroke="#8c94a0" stroke-width="1.5"/>
+  <path d="M70 160 C92 138 150 130 214 134" stroke="url(#accent)" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <!-- seat -->
+  <path d="M84 104 C118 84 204 84 236 96 L232 112 C200 102 122 102 88 118 Z" fill="#23252b"/>
+  <path d="M100 98 C130 90 190 90 222 97" stroke="#4a4e57" stroke-width="2" fill="none"/>
+  <!-- tail light -->
+  <path d="M46 130 L56 126 L58 146 L48 150 Z" fill="#d12b3b"/>
+  <!-- floorboard -->
+  <path d="M168 192 H276 C284 192 288 198 286 204 H170 Z" fill="#c8ced6" stroke="#8c94a0"/>
+  <!-- front leg shield -->
+  <path d="M262 198 C266 150 276 108 292 74 L322 80 C312 120 312 160 316 198 Z" fill="url(#body)" stroke="#8c94a0" stroke-width="1.5"/>
+  <path d="M282 92 C288 130 290 164 296 196" stroke="url(#accent)" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.9"/>
+  <!-- handlebar and mirror -->
+  <path d="M286 70 C300 64 322 66 332 74" stroke="#23252b" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <path d="M296 66 L284 36" stroke="#23252b" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="280" cy="32" rx="12" ry="8" fill="#cfd4db" stroke="#6d7581" transform="rotate(-18 280 32)"/>
+  <path d="M310 60 L332 52" stroke="#d12b3b" stroke-width="5" stroke-linecap="round"/>
+  <!-- headlight -->
+  <path d="M322 82 C340 84 350 96 348 110 C346 118 336 120 326 116 Z" fill="#fffbe2" stroke="#8c94a0" stroke-width="1.5"/>
+  <path d="M332 90 C340 92 344 98 343 106" stroke="#f0b23c" stroke-width="2.5" fill="none"/>
+  <!-- fork and fender -->
+  <path d="M322 120 L338 204" stroke="#8f97a3" stroke-width="9" stroke-linecap="round"/>
+  <path d="M302 178 C312 150 352 150 366 180 L356 186 C346 168 322 168 312 186 Z" fill="url(#body)" stroke="#8c94a0"/>
+  <!-- rear fender and wheels -->
+  <path d="M66 190 C72 156 124 156 140 186 L130 192 C118 172 90 172 80 196 Z" fill="url(#body)" stroke="#8c94a0"/>
+  <use href="#wheel" x="106" y="206"/>
+  <use href="#wheel" x="340" y="206"/>
+</svg>

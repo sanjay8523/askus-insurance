@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 270" width="440" height="270">
+  <defs>
+    <linearGradient id="skinA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9b48b"/><stop offset="1" stop-color="#c98d63"/></linearGradient>
+    <linearGradient id="skinB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0bf98"/><stop offset="1" stop-color="#d49a70"/></linearGradient>
+    <linearGradient id="skinC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4c9a6"/><stop offset="1" stop-color="#dba479"/></linearGradient>
+    <linearGradient id="tee" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a52b8"/><stop offset="1" stop-color="#4c2f86"/></linearGradient>
+    <linearGradient id="top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3a4b4"/><stop offset="1" stop-color="#d9708a"/></linearGradient>
+    <linearGradient id="dress" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe5f0"/></linearGradient>
+    <filter id="soft" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="8"/></filter>
+  </defs>
+  <ellipse cx="220" cy="262" rx="170" ry="14" fill="#2a1a52" opacity="0.25" filter="url(#soft)"/>
+  <!-- man -->
+  <path d="M40 270 C40 214 70 188 118 184 L160 184 C208 188 238 214 238 270 Z" fill="url(#tee)"/>
+  <path d="M104 184 C112 196 128 196 136 184 Z" fill="#3c2670"/>
+  <rect x="108" y="158" width="26" height="30" rx="10" fill="url(#skinA)"/>
+  <ellipse cx="121" cy="124" rx="38" ry="44" fill="url(#skinA)"/>
+  <path d="M83 118 C80 84 104 70 124 72 C150 72 164 92 160 118 C152 100 140 94 122 96 C102 96 90 104 83 118 Z" fill="#1f1a1d"/>
+  <ellipse cx="108" cy="128" rx="3.5" ry="4.5" fill="#2a1d1a"/><ellipse cx="136" cy="128" rx="3.5" ry="4.5" fill="#2a1d1a"/>
+  <path d="M108 148 C116 156 128 156 136 148" stroke="#7a3b2a" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M96 140 C100 156 110 162 122 162 C134 162 144 156 148 140 C142 150 134 154 122 154 C110 154 102 150 96 140 Z" fill="#2a2326" opacity="0.55"/>
+  <!-- woman -->
+  <path d="M202 270 C202 214 232 188 280 184 L322 184 C370 188 400 214 400 270 Z" fill="url(#top)"/>
+  <path d="M266 184 C274 198 290 198 298 184 Z" fill="#b8506a"/>
+  <rect x="270" y="158" width="24" height="30" rx="10" fill="url(#skinB)"/>
+  <path d="M236 126 C228 70 262 56 284 58 C316 58 340 84 332 130 C330 168 340 200 346 222 C320 214 300 200 296 176 L270 176 C264 200 246 214 222 222 C232 198 238 160 236 126 Z" fill="#1c1517"/>
+  <ellipse cx="283" cy="124" rx="36" ry="42" fill="url(#skinB)"/>
+  <path d="M248 108 C256 84 282 76 306 86 C318 92 322 104 320 112 C308 98 280 94 248 108 Z" fill="#1c1517"/>
+  <ellipse cx="270" cy="128" rx="3.5" ry="4.5" fill="#2a1d1a"/><ellipse cx="296" cy="128" rx="3.5" ry="4.5" fill="#2a1d1a"/>
+  <path d="M270 146 C277 153 289 153 296 146" stroke="#b03a52" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <circle cx="249" cy="140" r="3" fill="#f6d27a"/><circle cx="317" cy="140" r="3" fill="#f6d27a"/>
+  <!-- child -->
+  <path d="M148 270 C148 238 170 220 204 218 L238 218 C270 222 290 240 290 270 Z" fill="url(#dress)" stroke="#c8d0de"/>
+  <path d="M200 218 C206 228 222 228 228 218 Z" fill="#c8d0de"/>
+  <rect x="203" y="196" width="22" height="26" rx="9" fill="url(#skinC)"/>
+  <ellipse cx="214" cy="170" rx="30" ry="34" fill="url(#skinC)"/>
+  <path d="M184 166 C180 138 200 128 216 128 C236 128 248 144 244 166 C240 152 230 148 214 148 C200 148 190 154 184 166 Z" fill="#241a1c"/>
+  <circle cx="190" cy="136" r="9" fill="#241a1c"/><circle cx="238" cy="136" r="9" fill="#241a1c"/>
+  <circle cx="190" cy="136" r="4" fill="#e65d82"/><circle cx="238" cy="136" r="4" fill="#e65d82"/>
+  <ellipse cx="203" cy="172" rx="3" ry="4" fill="#2a1d1a"/><ellipse cx="225" cy="172" rx="3" ry="4" fill="#2a1d1a"/>
+  <path d="M205 186 C211 192 218 192 224 186" stroke="#b03a52" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="194" cy="182" r="5" fill="#f0a08c" opacity="0.6"/><circle cx="234" cy="182" r="5" fill="#f0a08c" opacity="0.6"/>
+  <!-- parents' arms around the child -->
+  <path d="M150 232 C168 226 190 232 204 250 L196 270 H150 Z" fill="url(#tee)"/>
+  <path d="M290 232 C272 226 250 232 236 250 L244 270 H290 Z" fill="url(#top)"/>
+  <circle cx="198" cy="250" r="9" fill="url(#skinA)"/><circle cx="242" cy="250" r="9" fill="url(#skinB)"/>
+</svg>

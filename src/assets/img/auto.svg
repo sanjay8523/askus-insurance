@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 270" width="440" height="270">
+  <defs>
+    <linearGradient id="yellow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd84a"/>
+      <stop offset="0.6" stop-color="#f6b813"/>
+      <stop offset="1" stop-color="#c88800"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f9d57"/>
+      <stop offset="1" stop-color="#14663a"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9fc4de"/>
+      <stop offset="1" stop-color="#3d5a73"/>
+    </linearGradient>
+    <radialGradient id="rim" cx="0.4" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#f4f6f8"/>
+      <stop offset="0.6" stop-color="#aab1bb"/>
+      <stop offset="1" stop-color="#6e7682"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-300%" width="140%" height="700%"><feGaussianBlur stdDeviation="5"/></filter>
+    <g id="wheel">
+      <circle r="32" fill="#15171b"/>
+      <circle r="26" fill="#23262c"/>
+      <circle r="18" fill="url(#rim)"/>
+      <g stroke="#69717d" stroke-width="4" stroke-linecap="round">
+        <path d="M0 0 L0 -16"/><path d="M0 0 L15.2 -4.9"/><path d="M0 0 L9.4 13"/><path d="M0 0 L-9.4 13"/><path d="M0 0 L-15.2 -4.9"/>
+      </g>
+      <circle r="5" fill="#3a3f47"/>
+    </g>
+  </defs>
+  <ellipse cx="226" cy="248" rx="180" ry="10" fill="#0b1626" opacity="0.38" filter="url(#soft)"/>
+  <!-- canopy roof -->
+  <path d="M40 98 C40 62 74 50 118 50 H252 C284 50 304 66 316 98 Z" fill="url(#green)" stroke="#0e4a2a" stroke-width="1.5"/>
+  <path d="M60 66 C90 58 200 56 262 62" stroke="#fff" stroke-width="3" opacity="0.4" fill="none" stroke-linecap="round"/>
+  <!-- pillars -->
+  <path d="M52 98 V150 M178 98 V150 M254 98 V150" stroke="#1d2a23" stroke-width="8"/>
+  <!-- passenger cabin interior seen from the side -->
+  <path d="M56 100 H300 L316 140 H56 Z" fill="#3b3f46"/>
+  <path d="M70 112 H170 V140 H70 Z" fill="#7b5236"/>
+  <path d="M184 112 H246 V140 H184 Z" fill="#7b5236"/>
+  <circle cx="226" cy="108" r="9" fill="#d8a37e"/>
+  <path d="M212 120 C214 112 238 112 240 120 V140 H212 Z" fill="#315d9e"/>
+  <!-- windshield and nose -->
+  <path d="M296 62 C318 66 336 84 344 112 L352 148 L320 148 L306 104 Z" fill="url(#glass)" stroke="#0e4a2a" stroke-width="2"/>
+  <!-- lower yellow body -->
+  <path d="M40 142 H298 L346 150 C366 154 376 168 374 186 L372 214 H40 Z" fill="url(#yellow)" stroke="#a87300" stroke-width="1.5"/>
+  <path d="M40 176 H370" stroke="#a87300" stroke-width="2" opacity="0.6"/>
+  <path d="M52 156 H280" stroke="#fff" stroke-width="3" opacity="0.5" stroke-linecap="round"/>
+  <!-- bumper, headlight, indicator -->
+  <path d="M346 196 H386 C392 196 394 202 392 208 H346 Z" fill="#3b3f46"/>
+  <path d="M346 156 C364 158 372 166 370 178 L346 176 Z" fill="#fffbe2" stroke="#8c6a00"/>
+  <circle cx="338" cy="188" r="4" fill="#f08a1c"/>
+  <!-- rear light -->
+  <rect x="36" y="150" width="8" height="22" rx="2" fill="#cf2a3a"/>
+  <!-- front fender -->
+  <path d="M298 214 C300 176 352 176 356 214 Z" fill="url(#yellow)" stroke="#a87300"/>
+  <!-- mudguards -->
+  <path d="M80 214 C84 180 140 180 146 214 Z" fill="#1d2a23"/>
+  <use href="#wheel" x="112" y="224"/>
+  <use href="#wheel" x="326" y="224"/>
+  <!-- 'AUTO' plate -->
+  <rect x="180" y="190" width="70" height="16" rx="3" fill="#fff" stroke="#3b3f46"/>
+  <path d="M188 198 H242" stroke="#3b3f46" stroke-width="3" stroke-dasharray="6 3"/>
+</svg>

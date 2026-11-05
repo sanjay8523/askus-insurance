@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 270" width="440" height="270">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.45" stop-color="#e3e7ec"/>
+      <stop offset="1" stop-color="#a9b1bd"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#35465c"/>
+      <stop offset="0.55" stop-color="#16202e"/>
+      <stop offset="1" stop-color="#2c3d52"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#fff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="rim" cx="0.4" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#f4f6f8"/>
+      <stop offset="0.6" stop-color="#aab1bb"/>
+      <stop offset="1" stop-color="#6e7682"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-300%" width="140%" height="700%"><feGaussianBlur stdDeviation="6"/></filter>
+    <g id="wheel">
+      <circle r="40" fill="#15171b"/>
+      <circle r="34" fill="#23262c"/>
+      <circle r="26" fill="url(#rim)"/>
+      <g stroke="#69717d" stroke-width="5" stroke-linecap="round">
+        <path d="M0 0 L0 -23"/><path d="M0 0 L21.9 -7.1"/><path d="M0 0 L13.5 18.6"/><path d="M0 0 L-13.5 18.6"/><path d="M0 0 L-21.9 -7.1"/>
+      </g>
+      <circle r="23" fill="none" stroke="#8d95a1" stroke-width="1.5"/>
+      <circle r="7" fill="#3a3f47"/><circle r="3" fill="#c9ced6"/>
+    </g>
+  </defs>
+  <ellipse cx="226" cy="236" rx="190" ry="11" fill="#0b1626" opacity="0.38" filter="url(#soft)"/>
+  <!-- body -->
+  <path d="M34 220 V176 C34 160 46 152 62 148 L122 138 C140 108 168 90 208 88 L284 88 C318 88 342 108 360 140 L394 152 C414 158 424 170 424 190 V208 C424 215 419 220 412 220 Z" fill="url(#body)" stroke="#8c94a0" stroke-width="1.5"/>
+  <!-- lower dark cladding -->
+  <path d="M34 200 H424 V212 C424 218 419 222 412 222 H46 C39 222 34 218 34 212 Z" fill="#2a2e35"/>
+  <!-- shoulder highlight and crease -->
+  <path d="M66 164 L346 158" stroke="#fff" stroke-width="3" opacity="0.8" fill="none" stroke-linecap="round"/>
+  <path d="M60 190 L410 192" stroke="#7d8591" stroke-width="2" opacity="0.6" fill="none"/>
+  <!-- windows -->
+  <path d="M136 136 C150 112 174 98 208 96 L282 96 C308 96 328 112 346 140 Z" fill="url(#glass)"/>
+  <path d="M236 98 H248 V138 H236 Z" fill="#dfe3e9"/>
+  <path d="M150 128 C162 112 180 104 204 103 L226 103 L204 134 Z" fill="url(#shine)" opacity="0.5"/>
+  <path d="M262 103 L284 103 C298 104 312 112 322 126 L298 134 Z" fill="url(#shine)" opacity="0.4"/>
+  <!-- door lines and handles -->
+  <path d="M242 140 V198" stroke="#8c94a0" stroke-width="1.6"/>
+  <path d="M150 146 V198" stroke="#8c94a0" stroke-width="1.6"/>
+  <path d="M322 148 V198" stroke="#8c94a0" stroke-width="1.6"/>
+  <rect x="214" y="150" width="20" height="5" rx="2.5" fill="#6d7581"/>
+  <rect x="278" y="150" width="20" height="5" rx="2.5" fill="#6d7581"/>
+  <!-- mirror -->
+  <path d="M340 138 C350 134 362 138 364 146 L342 148 Z" fill="#d7dce3" stroke="#8c94a0"/>
+  <!-- lights -->
+  <path d="M388 156 L418 164 C422 166 423 170 423 174 L420 178 L386 172 Z" fill="#fffbe2" stroke="#8c94a0" stroke-width="1.2"/>
+  <path d="M396 160 L414 165" stroke="#f0b23c" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M34 164 L48 158 L48 180 L34 182 Z" fill="#cf2a3a"/>
+  <!-- grille -->
+  <path d="M410 182 H424 V204 H410 Z" fill="#1b1d22"/>
+  <path d="M412 186 H424 M412 191 H424 M412 196 H424" stroke="#6d7581" stroke-width="1.5"/>
+  <!-- wheel wells -->
+  <circle cx="108" cy="216" r="48" fill="#0f1114"/>
+  <circle cx="338" cy="216" r="48" fill="#0f1114"/>
+  <use href="#wheel" x="108" y="216"/>
+  <use href="#wheel" x="338" y="216"/>
+  <!-- glossy reflection on bonnet -->
+  <path d="M110 150 C190 144 300 146 366 156" stroke="url(#shine)" stroke-width="6" fill="none" opacity="0.7"/>
+</svg>

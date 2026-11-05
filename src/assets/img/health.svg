@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 270" width="440" height="270">
+  <defs>
+    <radialGradient id="heart" cx="0.35" cy="0.3" r="0.9">
+      <stop offset="0" stop-color="#ff7f8f"/>
+      <stop offset="0.5" stop-color="#e5223f"/>
+      <stop offset="1" stop-color="#9b0d27"/>
+    </radialGradient>
+    <linearGradient id="skinL" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffdcc0"/>
+      <stop offset="1" stop-color="#e0a67f"/>
+    </linearGradient>
+    <linearGradient id="skinR" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd2b3"/>
+      <stop offset="1" stop-color="#d89a72"/>
+    </linearGradient>
+    <linearGradient id="sleeve" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#cfd6e0"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="8"/></filter>
+  </defs>
+  <ellipse cx="220" cy="232" rx="130" ry="14" fill="#7a1022" opacity="0.28" filter="url(#soft)"/>
+  <!-- sleeves -->
+  <path d="M30 270 L40 214 C60 206 86 214 100 238 L96 270 Z" fill="url(#sleeve)" stroke="#aeb7c4"/>
+  <path d="M410 270 L400 214 C380 206 354 214 340 238 L344 270 Z" fill="url(#sleeve)" stroke="#aeb7c4"/>
+  <!-- heart -->
+  <path d="M220 206 C128 154 126 78 176 62 C202 54 218 70 220 84 C222 70 238 54 264 62 C314 78 312 154 220 206 Z" fill="url(#heart)"/>
+  <path d="M158 82 C168 68 186 66 198 76" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.55"/>
+  <!-- cross -->
+  <rect x="204" y="94" width="32" height="68" rx="6" fill="#fff"/>
+  <rect x="186" y="112" width="68" height="32" rx="6" fill="#fff"/>
+  <!-- hands cradling the heart -->
+  <defs>
+    <g id="hand">
+      <path d="M30 246 C34 218 70 208 108 208 L208 208 C226 208 234 220 226 232 C218 246 198 250 178 252 L100 258 C62 262 28 258 30 246 Z" fill="url(#skinL)" stroke="#b97d55" stroke-width="1.5"/>
+      <path d="M176 214 C196 212 214 214 226 222 M168 226 C190 226 210 228 224 234 M160 238 C182 240 200 242 214 246" stroke="#c88d66" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M116 208 C124 188 152 182 176 192 C170 202 150 206 132 210 Z" fill="url(#skinL)" stroke="#b97d55" stroke-width="1.5"/>
+      <path d="M60 222 C86 214 120 214 150 220" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.5"/>
+    </g>
+  </defs>
+  <use href="#hand"/>
+  <use href="#hand" transform="translate(440 0) scale(-1 1)"/>
+</svg>

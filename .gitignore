@@ -1,0 +1,15 @@
+node_modules
+dist
+.env.local
+.env*.local
+.firebase
+*.log
+.dev.vars
+.wrangler
+legacy/
+*.tsbuildinfo
+.dev.vars*
+!.dev.vars.example
+.env
+.env.*
+!.env.example

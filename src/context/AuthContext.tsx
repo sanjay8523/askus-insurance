@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: Ctx = {
     user: hasPhone(current) ? current : null,
-    pendingGoogleUser: current && !hasPhone(current) ? current : null,
+    pendingGoogleUser: current && !hasPhone(current) && current.providerData.some((p) => p.providerId === 'google.com') ? current : null,
     loading,
     async requestOtp(mobile) {
       const national = normMobile(mobile)

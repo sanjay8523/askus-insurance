@@ -3,11 +3,15 @@ export interface CloudflareEnv {
   CLOUDINARY_CLOUD_NAME: string
   CLOUDINARY_API_KEY: string
   CLOUDINARY_API_SECRET: string
+  ADMIN_ALLOWED_EMAILS?: string
 }
 
 export interface FirebaseIdentity {
   uid: string
   phoneNumber: string
+  email: string
+  /** Email/password account whose email is on ADMIN_ALLOWED_EMAILS and has been verified. */
+  isAdmin: boolean
 }
 
 let signingKeys: Promise<JsonWebKey[]> | undefined
@@ -54,7 +58,15 @@ export async function verifyFirebaseToken(request: Request, env: CloudflareEnv):
     typeof claims.exp !== 'number' || claims.exp <= now ||
     typeof claims.iat !== 'number' || claims.iat > now + 60
   ) throw new Error('Your sign-in session is invalid or expired. Sign in again.')
-  return { uid: claims.sub, phoneNumber: typeof claims.phone_number === 'string' ? claims.phone_number : '' }
+  const email = typeof claims.email === 'string' ? claims.email.toLowerCase() : ''
+  const provider = (claims.firebase as { sign_in_provider?: string } | undefined)?.sign_in_provider
+  const allowed = (env.ADMIN_ALLOWED_EMAILS || '').split(',').map((v) => v.trim().toLowerCase()).filter(Boolean)
+  return {
+    uid: claims.sub,
+    phoneNumber: typeof claims.phone_number === 'string' ? claims.phone_number : '',
+    email,
+    isAdmin: Boolean(email) && allowed.includes(email) && claims.email_verified === true && provider === 'password',
+  }
 }
 
 export async function sha1(value: string) {

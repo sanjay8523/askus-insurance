@@ -15,3 +15,4 @@ legacy/
 !.env.example
 cloudflare-pages.*
 wrangler.toml
+paisabazaar_quotes_*.json

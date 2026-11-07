@@ -1,0 +1,70 @@
+/* Admin console motion. Respects reduced-motion. */
+@keyframes admin-slide { from { transform: translateX(24px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes admin-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes admin-pop { from { transform: translateY(-4px) scale(.98); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes admin-slide-up { from { transform: translateY(8px); opacity: 0 } to { transform: none; opacity: 1 } }
+.admin-slide { animation: admin-slide .2s ease-out }
+.admin-fade { animation: admin-fade .2s ease-out }
+.admin-pop { animation: admin-pop .12s ease-out; transform-origin: top right }
+.admin-slide-up { animation: admin-slide-up .18s ease-out }
+.app-root { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; font-feature-settings: 'cv11', 'ss01'; }
+.app-root :focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; border-radius: 6px; }
+.app-root input:focus-visible, .app-root select:focus-visible, .app-root textarea:focus-visible { outline: none; }
+.app-root .tabular { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  .admin-slide, .admin-fade, .admin-pop, .admin-slide-up { animation: none }
+  .app-root * { transition-duration: .01ms !important }
+}
+
+/* The public site's legacy.css has no Tailwind preflight and sets global svg/nav/h2 rules.
+   These zero-specificity resets restore sane defaults for the admin only, without fighting utility classes. */
+/* Layered, so they beat browser defaults but lose to every utility class and to legacy.css. */
+@layer admin-reset {
+  .app-root :where(p, h1, h2, h3, h4, dl, dd, ul, ol, figure) { margin: 0; }
+  .app-root :where(ul, ol) { list-style: none; padding: 0; }
+  .app-root table { border-collapse: collapse; }
+  .app-root :where(h1, h2, h3, h4) { font-size: inherit; font-weight: inherit; }
+}
+.app-root svg.lucide { stroke-width: 1.75; }
+/* legacy.css forces every svg to 21px; give Lucide icons back the size they were asked for */
+.app-root svg[width="10"]{width:10px;height:10px}
+.app-root svg[width="11"]{width:11px;height:11px}
+.app-root svg[width="12"]{width:12px;height:12px}
+.app-root svg[width="13"]{width:13px;height:13px}
+.app-root svg[width="14"]{width:14px;height:14px}
+.app-root svg[width="15"]{width:15px;height:15px}
+.app-root svg[width="16"]{width:16px;height:16px}
+.app-root svg[width="17"]{width:17px;height:17px}
+.app-root svg[width="18"]{width:18px;height:18px}
+.app-root svg[width="19"]{width:19px;height:19px}
+.app-root svg[width="20"]{width:20px;height:20px}
+.app-root svg[width="21"]{width:21px;height:21px}
+.app-root svg[width="22"]{width:22px;height:22px}
+.app-root svg[width="23"]{width:23px;height:23px}
+.app-root svg[width="24"]{width:24px;height:24px}
+.app-root svg[width="25"]{width:25px;height:25px}
+.app-root svg[width="26"]{width:26px;height:26px}
+.app-root svg[width="27"]{width:27px;height:27px}
+.app-root svg[width="28"]{width:28px;height:28px}
+.app-root svg[width="29"]{width:29px;height:29px}
+.app-root svg[width="30"]{width:30px;height:30px}
+.app-root svg[width="31"]{width:31px;height:31px}
+.app-root svg[width="32"]{width:32px;height:32px}
+.app-root svg[width="33"]{width:33px;height:33px}
+.app-root svg[width="34"]{width:34px;height:34px}
+.app-root svg[width="35"]{width:35px;height:35px}
+.app-root svg[width="36"]{width:36px;height:36px}
+.app-root svg[width="37"]{width:37px;height:37px}
+.app-root svg[width="38"]{width:38px;height:38px}
+.app-root svg[width="39"]{width:39px;height:39px}
+.app-root svg[width="40"]{width:40px;height:40px}
+.app-root svg[width="41"]{width:41px;height:41px}
+.app-root svg[width="42"]{width:42px;height:42px}
+.app-root svg[width="43"]{width:43px;height:43px}
+.app-root svg[width="44"]{width:44px;height:44px}
+.app-root svg[width="45"]{width:45px;height:45px}
+.app-root svg[width="46"]{width:46px;height:46px}
+.app-root svg[width="47"]{width:47px;height:47px}
+.app-root svg[width="48"]{width:48px;height:48px}
+/* headings focused by script for screen readers should not draw a ring */
+.app-root [tabindex="-1"]:focus-visible { outline: none; }

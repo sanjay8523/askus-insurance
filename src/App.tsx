@@ -4,11 +4,17 @@ import AuthModal from './components/AuthModal'
 import DocUpload from './components/DocUpload'
 import Ic from './components/Ic'
 import JourneyModal from './components/JourneyModal'
+import ModeChoice from './components/ModeChoice'
+import OfflineModal from './components/OfflineModal'
+import type { OfflineType } from './lib/offline'
 import Modal from './components/Modal'
 import { useAuth } from './context/AuthContext'
 import { auth, firebaseConfigured } from './lib/firebase'
 import { inr, PRODUCTS, type Product } from './lib/products'
 
+const TOP_LEVEL = new Set(['car', 'bike', 'auto', 'commercial'])
+/** Products that offer an Online / Offline choice. */
+const HAS_OFFLINE = new Set(['car', 'bike'])
 const GROUPS = ['Motor Insurance', 'Health Insurance', 'Term Insurance']
 const REVIEWS = [
   { name: 'Look beyond the premium', quote: 'Compare exclusions, waiting periods, deductibles and renewal conditions alongside the price.', question: 'What should I check in my insurance cover?' },
@@ -73,11 +79,35 @@ export default function App() {
   const { user, pendingGoogleUser } = useAuth()
   const [authOpen, setAuthOpen] = useState(false)
   const [journey, setJourney] = useState<Product | null>(null)
+  const [choice, setChoice] = useState<Product | null>(null)
+  const [offline, setOffline] = useState<OfflineType | null>(null)
+  const [wantsOffline, setWantsOffline] = useState<OfflineType | null>(null)
+  // Dev-only shortcut for previewing the offline flow: http://localhost:5173/?offline=bike (stripped from production builds)
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const q = new URLSearchParams(location.search).get('offline')
+    if (q === 'car' || q === 'bike') setOffline(q)
+  }, [])
   const [note, setNote] = useState<{ title: string; text: string } | null>(null)
   const [reviewIndex, setReviewIndex] = useState(0)
 
   // Google users without a verified mobile number must add one
   useEffect(() => { if (pendingGoogleUser) setAuthOpen(true) }, [pendingGoogleUser])
+
+  // Offline needs a signed-in (mobile-verified) user: continue straight into the form after sign-in
+  useEffect(() => {
+    if (user && wantsOffline) { setOffline(wantsOffline); setWantsOffline(null) }
+  }, [user, wantsOffline])
+
+  const openOnline = (p: Product) => {
+    if (TOP_LEVEL.has(p.id) && p.journeyUrl) window.location.href = p.journeyUrl
+    else setJourney(p)
+  }
+  const startOffline = (p: Product) => {
+    setChoice(null)
+    if (user) setOffline(p.id as OfflineType)
+    else { setWantsOffline(p.id as OfflineType); setAuthOpen(true) }
+  }
 
   // Desktop hover menus (same behaviour as the original page)
   useEffect(() => {
@@ -120,7 +150,12 @@ export default function App() {
     if (prod) {
       closeMenus()
       const p = PRODUCTS.find((x) => x.id === prod.dataset.product)
-      if (p) setJourney(p)
+      if (!p) return
+      // Car and bike: choose Online (partner journey) or Offline (our own form, processed by the team).
+      // Same as the original preview: motor journeys open the partner page as the full page (it only works
+      // reliably at the top level); health and term run inside the iframe dialog.
+      if (HAS_OFFLINE.has(p.id)) setChoice(p)
+      else openOnline(p)
       return
     }
     const review = t.closest<HTMLElement>('[data-review]')
@@ -129,7 +164,7 @@ export default function App() {
     if (action) {
       closeMenus()
       const a = action.dataset.action
-      if (a === 'signin') return user ? void signOut(auth) : setAuthOpen(true)
+      if (a === 'signin') { if (user) window.location.href = '/account'; else setAuthOpen(true); return }
       if (a === 'dashboard') return user ? soon('Saved comparisons') : setAuthOpen(true)
       if (a === 'chat') return soon('Insurance help')
       if (a === 'callback') return soon('Request a callback', 'Please call our helpline on 7358447586 for now.')
@@ -223,7 +258,7 @@ export default function App() {
                     </a>
                   </div>
                 </div>
-                <button className="outline-button" data-action="signin" id="account-button">{user ? `Sign out (${user.displayName?.split(' ')[0] ?? 'you'})` : 'Sign In'}</button>
+                <button className="outline-button" data-action="signin" id="account-button">{user ? `My Account (${user.displayName?.split(' ')[0] ?? 'you'})` : 'Sign In'}</button>
               </div>
             </div>
           </header>
@@ -582,6 +617,8 @@ export default function App() {
           
       <div id="recaptcha-container" />
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+      {choice && <ModeChoice product={choice} onClose={() => setChoice(null)} onOnline={() => { const c = choice; setChoice(null); openOnline(c) }} onOffline={() => startOffline(choice)} />}
+      {offline && <OfflineModal type={offline} onClose={() => setOffline(null)} />}
       {journey && <JourneyModal product={journey} onClose={() => setJourney(null)} />}
       {note && (
         <Modal title={note.title} onClose={() => setNote(null)}>

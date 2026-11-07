@@ -1,9 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Staff: email/password accounts on this allowlist whose email address is verified.
+    function admin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['sanjaympatel8523@gmail.com', 'rajesh8523@gmail.com']
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+    function adminTouchOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'adminNote', 'updatedAt', 'updatedBy'])
+        && request.resource.data.status in ['new', 'contacted', 'quoted', 'issued', 'closed'];
+    }
     // Each user can only read/write their own profile and saved comparisons.
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if admin();
       match /saved/{id} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
       }
@@ -16,7 +28,34 @@ service cloud.firestore {
         && request.resource.data.name is string && request.resource.data.name.size() <= 80
         && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')
         && request.resource.data.files.size() <= 10;
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read: if (request.auth != null && resource.data.uid == request.auth.uid) || admin();
+      allow update: if admin() && adminTouchOnly();
+      allow delete: if false;
+    }
+    // Offline car / bike insurance requests (details + document references). Only mobile-verified users can
+    // create their own; the owner can read them back. The team works from the Firebase console / Admin SDK.
+    match /offlineRequests/{id} {
+      allow create: if request.auth != null
+        && request.auth.token.phone_number != null
+        && request.resource.data.keys().hasOnly(['uid', 'vehicleType', 'status', 'source', 'cashbackUpTo', 'createdAt', 'applicant', 'vehicle', 'policy', 'plan', 'documents'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.vehicleType in ['car', 'bike']
+        && request.resource.data.status == 'new'
+        && request.resource.data.source == 'offline'
+        && request.resource.data.cashbackUpTo in [300, 500]
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.applicant.name is string && request.resource.data.applicant.name.size() <= 80
+        && request.resource.data.applicant.mobile.matches('^[6-9][0-9]{9}$')
+        && request.resource.data.applicant.pincode.matches('^[0-9]{6}$')
+        && request.resource.data.documents.size() <= 6;
+      allow read: if (request.auth != null && resource.data.uid == request.auth.uid) || admin();
+      allow update: if admin() && adminTouchOnly();
+      allow delete: if false;
+    }
+    // Audit trail of staff actions: admins append and read; nobody edits or deletes.
+    match /auditLogs/{id} {
+      allow create: if admin() && request.resource.data.by == request.auth.token.email;
+      allow read: if admin();
       allow update, delete: if false;
     }
   }

@@ -5,7 +5,7 @@ service cloud.firestore {
     function admin() {
       return request.auth != null
         && request.auth.token.email_verified == true
-        && request.auth.token.email in ['sanjaympatel8523@gmail.com', 'rajesh8523@gmail.com']
+        && request.auth.token.email in ['sanjaympatel8523@gmail.com', 'rajesh8523@gmail.com', 'rajeshchatgpt1@gmail.com']
         && request.auth.token.firebase.sign_in_provider == 'password';
     }
     function adminTouchOnly() {

@@ -4,7 +4,7 @@ import { auth, db } from '../lib/firebase'
 
 /** Same two administrators and the same rule as Askus Fin: Firebase password account + this allowlist.
  *  Firestore rules and the Pages Function repeat the check server-side. */
-export const ADMIN_EMAILS = ['sanjaympatel8523@gmail.com', 'rajesh8523@gmail.com']
+export const ADMIN_EMAILS = ['sanjaympatel8523@gmail.com', 'rajesh8523@gmail.com', 'rajeshchatgpt1@gmail.com']
 export const isAdminEmail = (e: string | null | undefined) => Boolean(e && ADMIN_EMAILS.includes(e.trim().toLowerCase()))
 export const STATUSES = ['new', 'contacted', 'quoted', 'issued', 'closed'] as const
 export type Status = (typeof STATUSES)[number]

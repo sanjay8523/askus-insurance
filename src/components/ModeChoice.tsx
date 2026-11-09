@@ -4,6 +4,7 @@ import { inr } from '../lib/products'
 import { OFFLINE_CASHBACK, type OfflineType } from '../lib/offline'
 import type { Product } from '../lib/products'
 import { cn } from '../ui'
+import MoneyBanner from './MoneyBanner'
 
 /** "How would you like to buy?" Online (partner journey) or Offline (we collect details and process it). */
 export default function ModeChoice({
@@ -12,7 +13,7 @@ export default function ModeChoice({
   const type = product.id as OfflineType
   const dlg = useRef<HTMLDialogElement>(null)
   const label = product.name.replace(' Insurance', '').toLowerCase()
-  const online = type === 'car' ? '₹300' : '₹100'
+  const cashback = inr(OFFLINE_CASHBACK[type])
   useEffect(() => {
     const d = dlg.current!
     d.showModal()
@@ -21,14 +22,16 @@ export default function ModeChoice({
 
   const options = [
     {
-      key: 'online', icon: Zap, tag: 'Instant quotes', title: 'Buy online', go: onOnline, cta: 'Continue online',
+      key: 'online', icon: Zap, tag: 'Instant quotes', title: 'Buy Online', go: onOnline, cta: 'Continue online',
       text: 'Compare live quotes from insurers and buy right now.',
-      points: ['Instant quotes from top insurers', `${online} cashback once your policy is confirmed`],
+      points: [`Compare & save up to 91%+ on ${product.name}`, 'Get policy in 10 minutes'],
+      banner: <MoneyBanner variant="online" title="Pay less, cover more" sub="Buy in minutes, from anywhere" />,
     },
     {
-      key: 'offline', icon: ClipboardList, tag: `Up to ${inr(OFFLINE_CASHBACK[type]).replace('.00', '')} cashback`, title: 'Let our team handle it', go: onOffline, cta: 'Continue offline',
+      key: 'offline', icon: ClipboardList, tag: `Up to ${inr(OFFLINE_CASHBACK[type]).replace('.00', '')} cashback`, title: 'Buy Offline', go: onOffline, cta: 'Continue offline',
       text: 'Share your details and documents. Our team gets you the best quote and handles the rest.',
-      points: [`Up to ${inr(OFFLINE_CASHBACK[type])} cashback on ${label} insurance`, 'We call you within 24 hours'],
+      points: [`Up to ${cashback} cashback on ${label} insurance`, 'We call you within 24 hours'],
+      banner: <MoneyBanner variant="offline" title={`Earn up to ${cashback} cashback`} sub={`On your ${label} insurance, once confirmed`} />,
     },
   ]
 
@@ -57,7 +60,8 @@ export default function ModeChoice({
               <ul className="mt-4 space-y-2 text-sm text-zinc-700">
                 {o.points.map((p) => <li key={p} className="flex gap-2"><Check size={16} className="mt-0.5 shrink-0 text-emerald-600" />{p}</li>)}
               </ul>
-              <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600">{o.cta}<ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" /></span>
+              <span className="mt-auto block pt-4">{o.banner}</span>
+              <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600">{o.cta}<ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" /></span>
             </button>
           ))}
         </div>

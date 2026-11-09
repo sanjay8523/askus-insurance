@@ -1,6 +1,6 @@
 import { useId } from 'react'
 
-/** Money-themed banner for the Buy Online / Buy Offline cards: original illustration (coins, rupee notes, sparkles) with a short headline. */
+/** Money-themed banner on top of the Buy Online / Buy Offline cards: original illustration (coins, rupee notes, sparkles) with one big number. */
 
 const GOLD_SIDE = '#C98A14'
 const GOLD_RIM = '#FFF3C4'
@@ -53,15 +53,16 @@ function Note({ x, y, rot, id }: { x: number; y: number; rot: number; id: string
   )
 }
 
-export default function MoneyBanner({ variant, title, sub }: { variant: 'online' | 'offline'; title: string; sub: string }) {
+export default function MoneyBanner({ variant, label, stat, caption }: { variant: 'online' | 'offline'; label: string; stat: string; caption: string }) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, '')
   const online = variant === 'online'
   return (
-    <span className="relative block h-24 overflow-hidden rounded-xl"
+    <span className="relative block h-28 overflow-hidden"
       style={{ background: online ? 'linear-gradient(135deg,#4338ca 0%,#4f46e5 55%,#7c3aed 100%)' : 'linear-gradient(135deg,#047857 0%,#059669 55%,#10b981 100%)' }}>
-      <span className="relative z-10 flex h-full max-w-[52%] flex-col justify-center pl-4">
-        <span className="block text-[13px] font-semibold leading-snug text-white">{title}</span>
-        <span className="mt-1 block text-[11px] leading-snug text-white/80">{sub}</span>
+      <span className="relative z-10 flex h-full max-w-[50%] flex-col justify-center pl-5">
+        <span className="block text-[10px] font-semibold uppercase tracking-[.12em] text-white/75">{label}</span>
+        <span className="mt-1 block text-[34px] font-extrabold leading-none tracking-tight text-white">{stat}</span>
+        <span className="mt-1.5 block text-[12px] leading-snug text-white/85">{caption}</span>
       </span>
       <svg viewBox="0 0 170 100" className="absolute bottom-0 right-0 h-full w-auto" aria-hidden focusable="false">
         <defs>

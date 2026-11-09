@@ -2,7 +2,7 @@ import { useRef, useState, type ReactNode } from 'react'
 import { AlertCircle, CheckCircle2, FileText, Sparkles, UploadCloud, X } from 'lucide-react'
 import { cn } from '../../ui'
 
-export type ScanStatus = 'reading' | 'done' | 'none' | 'unavailable' | 'failed' | 'too_large'
+export type ScanStatus = 'reading' | 'done' | 'none' | 'locked' | 'failed'
 export type ScannedFile = { id: string; file: File; status: ScanStatus; found: number }
 
 const size = (n: number) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`)
@@ -14,10 +14,9 @@ function StatusLine({ e, what }: { e: ScannedFile; what: string }) {
     </span>
   )
   if (e.status === 'done') return <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700"><CheckCircle2 size={13} />{e.found} detail{e.found === 1 ? '' : 's'} filled in for you</span>
-  const text = e.status === 'none' ? `Saved. We couldn't spot the details, you'll fill them next.`
-    : e.status === 'too_large' ? 'Saved. Too large to read automatically, you\'ll fill the details next.'
-      : e.status === 'unavailable' ? 'Saved. Auto-fill is not switched on yet, you\'ll fill the details next.'
-        : 'Saved. We couldn\'t read it automatically, you\'ll fill the details next.'
+  const text = e.status === 'none' ? `Saved. We couldn't spot the details, you'll fill them next. A clearer, flat photo helps.`
+    : e.status === 'locked' ? 'Saved. This PDF is password-protected, so we can\'t read it. You\'ll fill the details next.'
+      : 'Saved. We couldn\'t read it automatically, you\'ll fill the details next.'
   return <span className="flex items-start gap-1.5 text-xs text-amber-700"><AlertCircle size={13} className="mt-px shrink-0" />{text}</span>
 }
 

@@ -6,7 +6,7 @@ import {
   ADDON_OPTIONS, INSURERS, NCB_OPTIONS, OFFLINE_CASHBACK, PREV_POLICY_TYPES, emptyForm, normReg, submitOfflineRequest, validateStep,
   type OfflineForm, type OfflineType,
 } from '../lib/offline'
-import { scanDocument, type ScanKind } from '../lib/ocr'
+import { scanDocument, warmUpReader, type ScanKind } from '../lib/ocr'
 import type { PolicyFields, RcFields } from '../lib/rcParse'
 import { describeReg, formatReg, lookupVehicle } from '../lib/vehicle'
 import { Button, cn } from '../ui'
@@ -64,6 +64,7 @@ export default function OfflineModal({ type, onClose }: { type: OfflineType; onC
   useEffect(() => {
     const d = dlg.current!
     d.showModal()
+    warmUpReader() // start loading the document reader while the customer types the number
     return () => d.close()
   }, [])
   useEffect(() => {
@@ -298,7 +299,7 @@ export default function OfflineModal({ type, onClose }: { type: OfflineType; onC
                   <UploadCard title="Previous policy" what="policy" icon={<ScrollText size={19} />} max={PER_KIND}
                     hint="Your current or last policy copy. Fills in the insurer, expiry date and NCB."
                     items={policyFiles} onAdd={(l) => addFiles('policy', l)} onRemove={(id) => setPolicyFiles((p) => p.filter((e) => e.id !== id))} />
-                  <p className="flex items-start gap-2 text-xs text-zinc-500"><ShieldCheck size={14} className="mt-px shrink-0 text-emerald-600" />Your documents are stored privately and seen only by you and our team. Text is read by Google Cloud Vision only to fill in this form.</p>
+                  <p className="flex items-start gap-2 text-xs text-zinc-500"><ShieldCheck size={14} className="mt-px shrink-0 text-emerald-600" />Your documents are stored privately and seen only by you and our team. Details are read on your own device to fill in this form, not sent anywhere else.</p>
                   <div className="border-t border-zinc-200 pt-5">
                     <button type="button" onClick={() => { set('isNew', true); set('regNumber', ''); go('details') }} className="text-sm font-medium text-indigo-600 hover:underline">No registration number yet? Insure a brand-new {vehicle}</button>
                   </div>

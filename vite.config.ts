@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 /**
- * Dev only: serves the Cloudflare Pages Functions under /api/documents/* and /api/ocr/* straight from `npm run dev`,
+ * Dev only: serves the Cloudflare Pages Functions under /api/documents/* straight from `npm run dev`,
  * using the secrets in .dev.vars. In production Cloudflare runs the same files from /functions.
  */
 function devFunctions(): Plugin {
@@ -12,7 +12,7 @@ function devFunctions(): Plugin {
     name: 'dev-pages-functions',
     apply: 'serve',
     configureServer(server) {
-      for (const group of ['documents', 'ocr']) server.middlewares.use(`/api/${group}`, async (req, res, next) => {
+      for (const group of ['documents']) server.middlewares.use(`/api/${group}`, async (req, res, next) => {
         try {
           const name = (req.url ?? '').split('?')[0].replace(/^\/|\/$/g, '')
           if (!/^[a-z-]+$/.test(name) || req.method !== 'POST') return next()
@@ -45,4 +45,11 @@ function devFunctions(): Plugin {
   }
 }
 
-export default defineConfig({ plugins: [react(), tailwindcss(), devFunctions()] })
+export default defineConfig({
+  plugins: [react(), tailwindcss(), devFunctions()],
+  resolve: {
+    // The document reader (src/lib/ocrWorker.ts) runs on the CPU build of ONNX Runtime: its .wasm is ~15 MB.
+    // The default build adds WebGPU and ships a ~30 MB .wasm, over Cloudflare Pages' 25 MiB per-file limit.
+    alias: [{ find: /^onnxruntime-web$/, replacement: 'onnxruntime-web/wasm' }],
+  },
+})

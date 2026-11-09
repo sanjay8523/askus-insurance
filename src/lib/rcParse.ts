@@ -30,6 +30,7 @@ const STATES = ['ANDAMAN', 'ANDHRA PRADESH', 'ARUNACHAL PRADESH', 'ASSAM', 'BIHA
   'HIMACHAL PRADESH', 'JAMMU', 'KASHMIR', 'JHARKHAND', 'KARNATAKA', 'KERALA', 'LADAKH', 'MADHYA PRADESH', 'MAHARASHTRA', 'MANIPUR', 'MEGHALAYA',
   'MIZORAM', 'NAGALAND', 'ODISHA', 'ORISSA', 'PUDUCHERRY', 'PONDICHERRY', 'PUNJAB', 'RAJASTHAN', 'SIKKIM', 'TAMIL NADU', 'TELANGANA', 'TRIPURA',
   'UTTAR PRADESH', 'UTTARAKHAND', 'WEST BENGAL', 'INDIA']
+const STATE_AFTER_DOT = new RegExp(String.raw`\.\s+(?=(?:${STATES.join('|')})\b)`, 'gi')
 const MONTHS: Record<string, string> = { JAN: '01', FEB: '02', MAR: '03', APR: '04', MAY: '05', JUN: '06', JUL: '07', AUG: '08', SEP: '09', SEPT: '09', OCT: '10', NOV: '11', DEC: '12' }
 
 const pad = (n: number | string) => String(n).padStart(2, '0')
@@ -93,7 +94,7 @@ export function parseRc(text: string): RcFields {
   out.regNumber = (labelledReg && findRegNumber(labelledReg)) || findRegNumber(text)
 
   // Owner name (and a gender hint from Mr/Mrs/Shri/Smt or S/O, D/O, W/O)
-  let owner = valueAfter(lines, /\b(?:owner'?s?\s*name|name\s*of\s*(?:the\s*)?(?:registered\s*)?owner|registered\s*owner)\b/i)
+  let owner = valueAfter(lines, /\b(?:owner[’'`]?s?\s*name|name\s*of\s*(?:the\s*)?(?:registered\s*)?owner|registered\s*owner)\b/i)
   if (owner) {
     const rel = owner.match(/\b(S\/O|D\/O|W\/O|SON OF|DAUGHTER OF|WIFE OF)\b/i)
     owner = owner.split(/\b(?:S\/W\/D|S\/O|D\/O|W\/O|SON OF|DAUGHTER OF|WIFE OF|C\/O)\b/i)[0].replace(/[,:;|]+$/, '').trim()
@@ -117,9 +118,11 @@ export function parseRc(text: string): RcFields {
       if (/\b[1-9]\d{5}\b/.test(lines[j])) break
     }
     const raw = parts.join(', ').replace(/\s*,\s*,+/g, ', ').replace(/^,\s*/, '').trim()
+      // OCR often reads the comma before the state as a full stop: "MANGALURU. KARNATAKA"
+      .replace(STATE_AFTER_DOT, ', ')
     const pin = raw.match(/\b([1-9]\d{5})\b/)
     if (pin) out.pincode = pin[1]
-    const segs = raw.replace(/\b[1-9]\d{5}\b/, '').split(/[,\n]/).map((x) => x.replace(/[-–]+\s*$/, '').trim()).filter(Boolean)
+    const segs = raw.replace(/\b[1-9]\d{5}\b/, '').split(/[,\n]/).map((x) => x.replace(/[-–.;:]+\s*$/, '').trim()).filter(Boolean)
     const kept = segs.filter((x) => !STATES.includes(x.toUpperCase().replace(/[.\s]+$/, '')))
     const city = [...kept].reverse().find((x) => /^[A-Za-z][A-Za-z .()-]{1,40}$/.test(x))
     if (city) out.city = properCase(city.replace(/\b(DIST|DISTRICT|TQ|TALUK)\.?\s*/i, ''))
@@ -128,8 +131,8 @@ export function parseRc(text: string): RcFields {
 
   // Maker and model
   // "Maker / Model: HYUNDAI MOTOR INDIA LTD / I20 ASTA" on one line, or separate "Maker" and "Model" lines
-  const combined = valueAfter(lines, /\bmaker'?s?\s*(?:name)?\s*\/\s*model(?:\s*name)?\b/i)
-  const maker = combined ?? valueAfter(lines, /\bmaker'?s?\s*(?:name|class)?\b/i)
+  const combined = valueAfter(lines, /\bmaker[’'`]?s?\s*(?:name)?\s*\/\s*model(?:\s*name)?\b/i)
+  const maker = combined ?? valueAfter(lines, /\bmaker[’'`]?s?\s*(?:name|class)?\b/i)
   const model = valueAfter(lines, /\b(?:model\s*name|model)\b/i)
   const cleanMaker = maker?.split(/\s*\/\s*/)[0].replace(/\b(LTD|LIMITED|PVT|PRIVATE|INDIA|CO)\b\.?/gi, '').replace(/\s+/g, ' ').trim()
   const cleanModel = (maker?.includes('/') ? maker.split('/').slice(1).join(' ') : model)?.replace(/\b(BS\s?[IVX\d]+)\b/i, '').trim()

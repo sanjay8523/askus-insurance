@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react'
+import { OFFLINE_CASHBACK } from '../../lib/offline'
 import { PRODUCTS, inr } from '../../lib/products'
 import cardCar from '../../assets/img/acko/card-car.webp'
 import cardAuto from '../../assets/img/stock/auto.webp'
@@ -36,7 +37,7 @@ export function ProductTiles() {
               </span>
               <span className="flex flex-1 flex-col p-3.5 sm:p-4">
                 <span className="text-[15px] font-semibold text-zinc-900 sm:text-base">{p.name}</span>
-                <span className="mt-0.5 text-[13px] text-zinc-500 sm:text-sm">{p.tag}</span>
+                <span className="mt-0.5 text-[13px] text-zinc-500 sm:text-sm">{p.id === 'car' || p.id === 'bike' ? `Up to ${inr(OFFLINE_CASHBACK[p.id])} cashback` : p.tag}</span>
                 <span className="mt-3 flex items-center justify-between gap-2 text-xs text-zinc-600 sm:text-[13px]">
                   <span>{p.startingAt ? <>From <b className="font-semibold text-zinc-900">{inr(p.startingAt)}*</b></> : 'Compare sample plans'}</span>
                   <span className="grid size-8 shrink-0 place-items-center rounded-full bg-zinc-100 text-zinc-700 transition-colors group-hover:bg-indigo-600 group-hover:text-white"><ArrowRight size={15} /></span>

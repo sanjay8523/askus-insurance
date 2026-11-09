@@ -12,7 +12,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: C
       return errorResponse('Cloudinary is not configured (set CLOUDINARY_* secrets).', 503)
     }
     const { publicId } = (await request.json()) as { publicId?: unknown }
-    if (typeof publicId !== 'string' || !/^insurance\/[A-Za-z0-9_-]+\/[0-9a-f-]{36}\/doc_\d\.(pdf|jpg|png)$/i.test(publicId)) {
+    if (typeof publicId !== 'string' || !/^insurance\/[A-Za-z0-9_-]+\/[0-9a-f-]{36}\/doc_\d\.(pdf|jpg|png|webp)$/i.test(publicId)) {
       return errorResponse('That document reference is not valid.', 400)
     }
     if (!identity.isAdmin && publicId.split('/')[1] !== identity.uid) return errorResponse('You cannot open this document.', 403)

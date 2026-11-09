@@ -7,6 +7,7 @@ import {
   type OfflineForm, type OfflineType,
 } from '../lib/offline'
 import { scanDocument, warmUpReader, type ScanKind } from '../lib/ocr'
+import { prepareUpload } from '../lib/uploadFiles'
 import type { PolicyFields, RcFields } from '../lib/rcParse'
 import { describeReg, formatReg, lookupVehicle } from '../lib/vehicle'
 import { Button, cn } from '../ui'
@@ -18,9 +19,7 @@ import { AutoTag, Chips, Group, Option, PlateInput, Progress, Question, Row, Seg
 type Screen = 'entry' | 'details' | 'owner' | 'done'
 type Source = 'rc' | 'policy' | 'lookup'
 const ORDER: Exclude<Screen, 'done'>[] = ['entry', 'details', 'owner']
-const MAX_FILE = 10 * 1024 * 1024
 const PER_KIND = 2
-const OK_TYPES = ['image/jpeg', 'image/png', 'application/pdf']
 let seq = 0
 const nextId = () => `f${++seq}`
 
@@ -138,24 +137,32 @@ export default function OfflineModal({ type, onClose }: { type: OfflineType; onC
     return fill(policyUpdates(p), 'policy')
   }
 
-  /** Adds files and reads each one straight away. */
+  /** Adds files (a photo in any format, or a PDF), prepares each one and reads it straight away. */
   function addFiles(kind: ScanKind, list: FileList | null) {
     if (!list?.length) return
     const incoming = Array.from(list)
-    const bad = incoming.find((x) => !OK_TYPES.includes(x.type) || x.size > MAX_FILE)
-    if (bad) return setError(`${bad.name}: only JPG, PNG or PDF up to 10MB.`)
     setError(null)
     const setList = kind === 'rc' ? setRcFiles : setPolicyFiles
     const room = PER_KIND - (kind === 'rc' ? rcFiles : policyFiles).length
     const entries: ScannedFile[] = incoming.slice(0, Math.max(0, room)).map((file) => ({ id: nextId(), file, status: 'reading', found: 0 }))
+    if (incoming.length > entries.length) setError(`You can add up to ${PER_KIND} files here.`)
     if (!entries.length) return
     setList((p) => [...p, ...entries])
     for (const e of entries) {
-      void scanDocument(e.file, kind).then((r) => {
+      void (async () => {
+        // HEIC, TIFF and other formats become a JPEG here; JPG, PNG, WebP and PDF stay as they are
+        const prepared = await prepareUpload(e.file)
+        if (!prepared.ok) {
+          setList((p) => p.filter((x) => x.id !== e.id))
+          setError(prepared.error)
+          return
+        }
+        setList((p) => p.map((x) => (x.id === e.id ? { ...x, file: prepared.file } : x)))
+        const r = await scanDocument(prepared.file, kind)
         // the count shown is what actually went into the form (not fields the customer already typed)
         const filled = r.ok && r.found ? (kind === 'rc' ? applyRc(r.fields) : applyPolicy(r.fields)) : 0
         setList((p) => p.map((x) => (x.id === e.id ? { ...x, status: r.ok ? (r.found ? 'done' : 'none') : r.reason, found: filled } : x)))
-      })
+      })()
     }
   }
 

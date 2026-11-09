@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { Check, ChevronDown, FileText, Pencil, Sparkles, UploadCloud, X } from 'lucide-react'
 import { cn } from '../../ui'
+import { ACCEPT } from '../../lib/uploadFiles'
 
 /** Presentational building blocks for the offline insurance journey. No business logic lives here. */
 
@@ -103,8 +104,8 @@ export function Dropzone({ files, max, onAdd, onRemove }: { files: File[]; max: 
         className={cn('flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors', over ? 'border-indigo-500 bg-indigo-50' : 'border-zinc-300 bg-zinc-50/50 hover:border-zinc-400 hover:bg-zinc-50')}>
         <span className="grid size-11 place-items-center rounded-full bg-white text-indigo-600 shadow-[0_1px_2px_rgba(16,24,40,.1)] ring-1 ring-zinc-200"><UploadCloud size={20} /></span>
         <p className="mt-3 text-[15px] font-medium text-zinc-900"><span className="text-indigo-600">Choose files</span><span className="max-sm:hidden"> or drag them here</span></p>
-        <p className="mt-1 text-xs text-zinc-500">RC, previous policy, Aadhaar/PAN, photos · JPG, PNG or PDF · up to 10 MB each · max {max} files</p>
-        <input ref={input} type="file" multiple accept=".jpg,.jpeg,.png,.pdf" hidden onChange={(e) => { onAdd(e.target.files); e.target.value = '' }} />
+        <p className="mt-1 text-xs text-zinc-500">RC, previous policy, Aadhaar/PAN · a photo in any format or a PDF · max {max} files</p>
+        <input ref={input} type="file" multiple accept={ACCEPT} hidden onChange={(e) => { onAdd(e.target.files); e.target.value = '' }} />
       </div>
       {files.length > 0 && (
         <ul className="mt-3 space-y-2">

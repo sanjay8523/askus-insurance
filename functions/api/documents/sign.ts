@@ -12,7 +12,8 @@ export async function onRequestPost({ request, env }: { request: Request; env: C
     if (typeof requestId !== 'string' || !/^[0-9a-f-]{36}$/i.test(requestId)) return errorResponse('The upload request is invalid.', 400)
     if (!Number.isInteger(index) || (index as number) < 0 || (index as number) > 9) return errorResponse('The upload request is invalid.', 400)
     const ext = String(extension || '').toLowerCase()
-    if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext)) return errorResponse('Upload a PDF, JPG, or PNG file.', 400)
+    // the site turns every other image type (HEIC, TIFF, AVIF, ...) into JPEG before uploading
+    if (!['pdf', 'jpg', 'jpeg', 'png', 'webp'].includes(ext)) return errorResponse('Upload a photo or a PDF.', 400)
     if (!env.CLOUDINARY_CLOUD_NAME || !env.CLOUDINARY_API_KEY || !env.CLOUDINARY_API_SECRET) {
       return errorResponse('Cloudinary is not configured (set CLOUDINARY_* secrets).', 503)
     }

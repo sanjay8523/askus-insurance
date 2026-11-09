@@ -24,14 +24,22 @@ const right = (c: Cell) => c.x + c.w
 const bottom = (c: Cell) => c.y + c.h
 const PIN = /\b[1-9]\d{5}\b/
 
-/** Same line: middles closer than ~half the smaller text height. */
-const sameRow = (a: Cell, b: Cell) => Math.abs(mid(a) - mid(b)) < Math.min(a.h, b.h) * 0.6
+/**
+ * Same line: middles closer than 0.4 of the smaller box. OCR boxes are often drawn up to twice as tall as the text,
+ * so a looser rule would merge an address's two lines into one.
+ */
+const ROW = 0.4
+const sameRow = (a: Cell, b: Cell) => Math.abs(mid(a) - mid(b)) < Math.min(a.h, b.h) * ROW
+/** `o` sits on a line below `c` (not on the same line), within `lines` box heights. */
+const isUnder = (o: Cell, c: Cell, lines: number) => mid(o) - mid(c) >= Math.min(o.h, c.h) * ROW && mid(o) - mid(c) < c.h * lines
+/** Horizontal overlap of two boxes. */
+const overlap = (a: Cell, b: Cell) => Math.max(0, Math.min(right(a), right(b)) - Math.max(a.x, b.x))
 
 /** Groups cells into rows (top to bottom), each row left to right. */
 export function rowsOf<C extends Cell>(cells: C[]): C[][] {
   const rows: { y: number; h: number; cells: C[] }[] = []
   for (const c of [...cells].sort((a, b) => mid(a) - mid(b))) {
-    const row = rows.find((r) => Math.abs(r.y - mid(c)) < Math.min(r.h, c.h) * 0.6)
+    const row = rows.find((r) => Math.abs(r.y - mid(c)) < Math.min(r.h, c.h) * ROW)
     if (row) { row.cells.push(c); row.y += (mid(c) - row.y) / row.cells.length } else rows.push({ y: mid(c), h: c.h, cells: [c] })
   }
   return rows.sort((a, b) => a.y - b.y).map((r) => r.cells.sort((a, b) => a.x - b.x))
@@ -91,8 +99,11 @@ function labelAt<F extends string>(text: string, defs: LabelDef<F>[], inside = f
   return undefined
 }
 
-/** OCR reads the Hindi half of a bilingual label as a few stray letters ("j af4/"): such a piece is dropped. */
-const STRAY_BEFORE_SLASH = /^[^0-9]{0,12}\/\s*$/
+/**
+ * OCR reads the Hindi half of a bilingual label as a few stray letters: "j af4/Date of Regn.", "qui afaf7 Date of Regn.".
+ * A short piece like that right before a label in the same box belongs to the label.
+ */
+const strayBeforeLabel = (t: string) => /^[^0-9]{0,12}\/\s*$/.test(t) || (t.length <= 16 && !/\d{3}/.test(t))
 
 /** Splits boxes that hold more than one label ("Regn. Number Date of Regn.") into one box per label. */
 function splitLabels<F extends string>(cells: Cell[], defs: LabelDef<F>[]): Cell[] {
@@ -110,7 +121,7 @@ function splitLabels<F extends string>(cells: Cell[], defs: LabelDef<F>[]): Cell
       if (at < 0) { out.push(cur); break }
       const head = part(cur, 0, at)
       const tail = part(cur, at)
-      if (head && STRAY_BEFORE_SLASH.test(head.text)) {
+      if (head && !labelAt(head.text, defs) && strayBeforeLabel(head.text)) {
         // the stray letters are the label's Hindi half: the label still starts where they start (values line up with it)
         cur = tail && { ...tail, x: head.x, w: right(tail) - head.x }
       } else {
@@ -162,12 +173,16 @@ export function readLayout<F extends string>(raw: Cell[], defs: LabelDef<F>[]): 
 
   /** The value under a label, within the label's column (up to the next label on the label's row). */
   const below = (L: Tagged<F>) => {
-    const nextLabel = cells.filter((o) => o !== L && isLabel(o) && sameRow(o, L) && o.x > right(L) - L.h * 0.5).sort((a, b) => a.x - b.x)[0]
-    const x0 = L.x - L.h, x1 = nextLabel ? nextLabel.x - L.h * 0.3 : Infinity
-    const under = cells.filter((o) => o !== L && mid(o) > bottom(L) && o.y - bottom(L) < L.h * 3 && o.x < x1 && right(o) > x0)
-    if (!under.length) return undefined
-    const top = under.reduce((a, b) => (mid(a) <= mid(b) ? a : b))
-    const first = under.filter((o) => sameRow(o, top)).sort((a, b) => Math.abs(a.x - L.x) - Math.abs(b.x - L.x))[0]
+    // the label's column runs from the label before it to the label after it on the same row
+    const mates = cells.filter((o) => o !== L && isLabel(o) && sameRow(o, L))
+    const next = mates.filter((o) => o.x > right(L) - L.h * 0.5).sort((a, b) => a.x - b.x)[0]
+    const prev = mates.filter((o) => right(o) < L.x + L.h * 0.5).sort((a, b) => right(b) - right(a))[0]
+    const x0 = prev ? right(prev) + L.h * 0.3 : -Infinity, x1 = next ? next.x - L.h * 0.3 : Infinity
+    // a value under the label overlaps the label's own width
+    const candidates = cells.filter((o) => o !== L && isUnder(o, L, 3.5) && o.x < right(L) + L.h && right(o) > L.x - L.h)
+    if (!candidates.length) return undefined
+    const top = candidates.reduce((a, b) => (mid(a) <= mid(b) ? a : b))
+    const first = candidates.filter((o) => sameRow(o, top)).sort((a, b) => overlap(b, L) - overlap(a, L))[0]
     return first && !isLabel(first) ? slice(first, x0, x1) : undefined
   }
 
@@ -177,8 +192,8 @@ export function readLayout<F extends string>(raw: Cell[], defs: LabelDef<F>[]): 
     let last = start
     while (out.length < max && !PIN.test(last.text)) {
       const next = cells
-        .filter((o) => o !== last && mid(o) > bottom(last) && o.y - bottom(last) < last.h * 1.2 && o.x < right(start) + start.h && right(o) > start.x - start.h)
-        .sort((a, b) => a.y - b.y || Math.abs(a.x - start.x) - Math.abs(b.x - start.x))[0]
+        .filter((o) => o !== last && isUnder(o, last, 2) && o.x < right(start) + start.h && right(o) > start.x - start.h)
+        .sort((a, b) => mid(a) - mid(b) || Math.abs(a.x - start.x) - Math.abs(b.x - start.x))[0]
       if (!next || isLabel(next)) break
       out.push(next.text)
       last = next

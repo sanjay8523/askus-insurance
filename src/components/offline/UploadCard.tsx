@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { AlertCircle, CheckCircle2, FileText, Sparkles, UploadCloud, X } from 'lucide-react'
 import { cn } from '../../ui'
+import { ACCEPT } from '../../lib/uploadFiles'
 
 export type ScanStatus = 'reading' | 'done' | 'none' | 'locked' | 'failed'
 export type ScannedFile = { id: string; file: File; status: ScanStatus; found: number }
@@ -63,8 +64,9 @@ export default function UploadCard({ title, what, hint, required, icon, items, m
           className={cn('mt-4 flex cursor-pointer items-center justify-center gap-2.5 rounded-xl border-2 border-dashed px-4 py-4 text-sm transition-colors',
             over ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-zinc-300 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50')}>
           <UploadCloud size={18} className="text-indigo-600" />
-          <span><b className="font-medium text-indigo-600">{items.length ? 'Add another file' : 'Upload photo or PDF'}</b><span className="max-sm:hidden"> or drag it here</span></span>
-          <input ref={input} type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" multiple={max > 1} hidden onChange={(ev) => { onAdd(ev.target.files); ev.target.value = '' }} />
+          <span className="text-center"><b className="font-medium text-indigo-600">{items.length ? 'Add another file' : 'Upload photo or PDF'}</b><span className="max-sm:hidden"> or drag it here</span>
+            {!items.length && <span className="block text-xs text-zinc-500">Any photo format (JPG, PNG, HEIC, WebP…) or PDF</span>}</span>
+          <input ref={input} type="file" accept={ACCEPT} multiple={max > 1} hidden onChange={(ev) => { onAdd(ev.target.files); ev.target.value = '' }} />
         </div>
       )}
       {footer}

@@ -2,13 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { uploadDocument } from '../lib/cloudinary'
+import { ACCEPT, prepareUpload } from '../lib/uploadFiles'
 import { useAuth } from '../context/AuthContext'
 import { normMobile, validMobile, validName } from '../lib/validate'
 import { PRODUCTS } from '../lib/products'
 import Ic from './Ic'
-
-const MAX = 10 * 1024 * 1024
-const OK = ['image/jpeg', 'image/png', 'application/pdf']
 
 export default function DocUpload({ onNeedSignIn }: { onNeedSignIn: () => void }) {
   const { user } = useAuth()
@@ -16,13 +14,23 @@ export default function DocUpload({ onNeedSignIn }: { onNeedSignIn: () => void }
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
   const [drag, setDrag] = useState(false)
+  const [preparing, setPreparing] = useState(0)
 
-  function add(list: FileList | File[]) {
+  /** Any photo format or a PDF: HEIC, TIFF and other formats are turned into JPEG here, big photos are made smaller. */
+  async function add(list: FileList | File[]) {
     const next = Array.from(list)
-    const bad = next.find((f) => !OK.includes(f.type) || f.size > MAX)
-    if (bad) return setMsg({ ok: false, text: `${bad.name}: only JPG, PNG or PDF up to 10MB.` })
     setMsg(null)
-    setFiles((p) => [...p, ...next].slice(0, 10))
+    setPreparing((n) => n + next.length)
+    const ready: File[] = []
+    let problem = ''
+    for (const file of next) {
+      const r = await prepareUpload(file)
+      if (r.ok) ready.push(r.file)
+      else problem ||= r.error
+      setPreparing((n) => n - 1)
+    }
+    if (problem) setMsg({ ok: false, text: problem })
+    setFiles((p) => [...p, ...ready].slice(0, 10))
   }
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -77,12 +85,12 @@ export default function DocUpload({ onNeedSignIn }: { onNeedSignIn: () => void }
           className={`upload-dropzone${drag ? ' dragover' : ''}`}
           onDragOver={(e) => { e.preventDefault(); setDrag(true) }}
           onDragLeave={() => setDrag(false)}
-          onDrop={(e) => { e.preventDefault(); setDrag(false); add(e.dataTransfer.files) }}
+          onDrop={(e) => { e.preventDefault(); setDrag(false); void add(e.dataTransfer.files) }}
         >
           <Ic n="files" />
           <span><b>Click to choose files</b> or drag &amp; drop</span>
-          <small>RC, Aadhaar, previous policy copy, photos — JPG, PNG or PDF, up to 10MB each</small>
-          <input type="file" multiple accept=".jpg,.jpeg,.png,.pdf" hidden onChange={(e) => { if (e.target.files) add(e.target.files); e.target.value = '' }} />
+          <small>RC, Aadhaar, previous policy copy — a photo in any format (JPG, PNG, HEIC, WebP…) or a PDF up to 10MB</small>
+          <input type="file" multiple accept={ACCEPT} hidden onChange={(e) => { if (e.target.files) void add(e.target.files); e.target.value = '' }} />
         </label>
         {files.length > 0 && (
           <ul className="file-chip-list">
@@ -95,8 +103,8 @@ export default function DocUpload({ onNeedSignIn }: { onNeedSignIn: () => void }
           </ul>
         )}
         {msg && <p role="status" style={{ margin: 0, color: msg.ok ? 'var(--green)' : '#d93025' }}>{msg.text}</p>}
-        <button className="primary-button" type="submit" disabled={busy}>
-          {busy ? 'Uploading…' : user ? 'Submit for manual processing' : 'Sign in to submit'} <Ic n="arrow-right" />
+        <button className="primary-button" type="submit" disabled={busy || preparing > 0}>
+          {busy ? 'Uploading…' : preparing > 0 ? 'Preparing files…' : user ? 'Submit for manual processing' : 'Sign in to submit'} <Ic n="arrow-right" />
         </button>
         <p className="upload-note"><Ic n="shield-check" /><span>Your files are stored privately and securely and are visible only to you and our review team. We'll process them within 24 hours.</span></p>
       </form>

@@ -52,8 +52,13 @@ let verifier: RecaptchaVerifier | null = null
 
 function getVerifier() {
   if (!verifier) {
-    const el = document.getElementById('recaptcha-container')
-    if (!el) throw new Error('Phone verification is unavailable right now.')
+    // Persistent container on <body>: works on every route (home, /account) and survives the sign-in dialog closing.
+    let el = document.getElementById('recaptcha-container')
+    if (!el) {
+      el = document.createElement('div')
+      el.id = 'recaptcha-container'
+      document.body.appendChild(el)
+    }
     verifier = new RecaptchaVerifier(auth, el, { size: 'invisible' })
   }
   return verifier

@@ -1,4 +1,4 @@
-import { useEffect, useState, type MouseEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { signOut } from 'firebase/auth'
 import AuthModal from './components/AuthModal'
 import DocUpload from './components/DocUpload'
@@ -8,6 +8,7 @@ import ModeChoice from './components/ModeChoice'
 import OfflineModal from './components/OfflineModal'
 import type { OfflineType } from './lib/offline'
 import Modal from './components/Modal'
+import { ClaimsBand, Hero, ProductTiles } from './components/home/HomeHero'
 import { useAuth } from './context/AuthContext'
 import { auth, firebaseConfigured } from './lib/firebase'
 import { inr, PRODUCTS, type Product } from './lib/products'
@@ -21,24 +22,6 @@ const REVIEWS = [
   { name: 'Prepare before a claim', quote: 'Keep your policy details and supporting documents accessible. Check the notification deadlines with your insurer.', question: 'How do claims work?' },
 ]
 
-function ProductCards() {
-  return (
-    <>
-      {PRODUCTS.map((p) => (
-        <button key={p.id} className="product-card" data-product={p.id} style={{ ['--tile' as string]: p.color }}>
-          <span className="tile-copy">
-            <b>{p.name}</b>
-            <span className="tile-tag">{p.tag}</span>
-            <span className="tile-chip"><Ic n="check" /> {p.startingAt ? `Starting at just ${inr(p.startingAt)}*` : 'Compare sample plans'}</span>
-          </span>
-          <span className="tile-art" aria-hidden="true"><Ic n={p.iconName} /></span>
-          <img className="tile-photo" src={p.image} alt="" width={400} height={300} loading="lazy" decoding="async" />
-          <span className="tile-go" aria-hidden="true"><Ic n="arrow-right" /></span>
-        </button>
-      ))}
-    </>
-  )
-}
 const MegaMenu = () => (
   <>
     {GROUPS.map((g) => (
@@ -82,6 +65,8 @@ export default function App() {
   const [choice, setChoice] = useState<Product | null>(null)
   const [offline, setOffline] = useState<OfflineType | null>(null)
   const [wantsOffline, setWantsOffline] = useState<OfflineType | null>(null)
+  /** Registration number typed into the home hero; passed on to the offline form. */
+  const [heroReg, setHeroReg] = useState('')
   // Dev-only shortcut for previewing the offline flow: http://localhost:5173/?offline=bike (stripped from production builds)
   useEffect(() => {
     if (!import.meta.env.DEV) return
@@ -93,6 +78,26 @@ export default function App() {
 
   // Google users without a verified mobile number must add one
   useEffect(() => { if (pendingGoogleUser) setAuthOpen(true) }, [pendingGoogleUser])
+
+  // Everything interactive needs a signed-in, mobile-verified user. If they are not, we ask them to sign in first
+  // and then carry on with whatever they clicked (for example the Online / Offline choice for car insurance).
+  const afterLogin = useRef<(() => void) | null>(null)
+  const requireLogin = (action: () => void) => {
+    if (user) return action()
+    afterLogin.current = action
+    setAuthOpen(true)
+  }
+  useEffect(() => {
+    if (user && afterLogin.current) { const run = afterLogin.current; afterLogin.current = null; run() }
+  }, [user])
+  const heroSearch = (type: OfflineType, reg: string) => {
+    const p = PRODUCTS.find((x) => x.id === type)!
+    requireLogin(() => { setHeroReg(reg); setChoice(p) })
+  }
+  const closeAuth = useCallback((reason?: 'done' | 'cancel') => {
+    setAuthOpen(false)
+    if (reason === 'cancel') afterLogin.current = null
+  }, [])
 
   // Offline needs a signed-in (mobile-verified) user: continue straight into the form after sign-in
   useEffect(() => {
@@ -154,8 +159,7 @@ export default function App() {
       // Car and bike: choose Online (partner journey) or Offline (our own form, processed by the team).
       // Same as the original preview: motor journeys open the partner page as the full page (it only works
       // reliably at the top level); health and term run inside the iframe dialog.
-      if (HAS_OFFLINE.has(p.id)) setChoice(p)
-      else openOnline(p)
+      requireLogin(() => { setHeroReg(''); if (HAS_OFFLINE.has(p.id)) setChoice(p); else openOnline(p) })
       return
     }
     const review = t.closest<HTMLElement>('[data-review]')
@@ -165,19 +169,19 @@ export default function App() {
       closeMenus()
       const a = action.dataset.action
       if (a === 'signin') { if (user) window.location.href = '/account'; else setAuthOpen(true); return }
-      if (a === 'dashboard') return user ? soon('Saved comparisons') : setAuthOpen(true)
-      if (a === 'chat') return soon('Insurance help')
-      if (a === 'callback') return soon('Request a callback', 'Please call our helpline on 7358447586 for now.')
+      if (a === 'dashboard') return requireLogin(() => soon('Saved comparisons'))
+      if (a === 'chat') return requireLogin(() => soon('Insurance help'))
+      if (a === 'callback') return requireLogin(() => soon('Request a callback', 'Please call our helpline on 7358447586 for now.'))
       if (a === 'privacy') return soon('Privacy notice', 'Your account details and any documents you upload are stored securely in your private Askus Insurance account and are visible only to you and our review team.')
     }
     const svc = t.closest<HTMLElement>('[data-service]')
     if (svc) {
       closeMenus()
       const s = svc.dataset.service
-      return soon(s === 'claim' ? 'Claims assistance' : s === 'track' ? 'Track a claim' : 'Renew your policy')
+      return requireLogin(() => soon(s === 'claim' ? 'Claims assistance' : s === 'track' ? 'Track a claim' : 'Renew your policy'))
     }
-    if (t.closest('[data-question]')) return soon('Insurance help')
-    if (t.closest('[data-calculator]')) return soon('Calculators')
+    if (t.closest('[data-question]')) return requireLogin(() => soon('Insurance help'))
+    if (t.closest('[data-calculator]')) return requireLogin(() => soon('Calculators'))
   }
 
   return (
@@ -263,14 +267,9 @@ export default function App() {
             </div>
           </header>
           <main id="main" tabIndex={-1}>
-            <section className="container insurance-section" aria-labelledby="hero-title">
-              <h1 className="tiles-heading" id="hero-title">Choose the cover <strong>you need</strong></h1>
-              <div className="product-grid" id="product-grid"><ProductCards /></div>
-              <p className="tiles-note">
-                *Starting third-party premium before 18% GST. Motor tiles show the lowest figure for the
-                category; your actual premium depends on the vehicle, engine size and insurer.
-              </p>
-            </section>
+            <Hero onSearch={heroSearch} />
+            <ProductTiles />
+            <ClaimsBand />
             <section className="container cashback-section" id="cashback-offer" aria-labelledby="cashback-title">
               <div className="cashback-callout">
                 <Ic n="tags" />
@@ -615,10 +614,9 @@ export default function App() {
             <Ic n="messages-square" /><span>Need help?</span>
           </button>
           
-      <div id="recaptcha-container" />
-      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+      {authOpen && <AuthModal onClose={closeAuth} />}
       {choice && <ModeChoice product={choice} onClose={() => setChoice(null)} onOnline={() => { const c = choice; setChoice(null); openOnline(c) }} onOffline={() => startOffline(choice)} />}
-      {offline && <OfflineModal type={offline} onClose={() => setOffline(null)} />}
+      {offline && <OfflineModal type={offline} initialReg={heroReg} onClose={() => setOffline(null)} />}
       {journey && <JourneyModal product={journey} onClose={() => setJourney(null)} />}
       {note && (
         <Modal title={note.title} onClose={() => setNote(null)}>

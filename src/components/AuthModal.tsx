@@ -88,9 +88,9 @@ export default function AuthModal({ onClose }: { onClose: (reason?: 'done' | 'ca
       <div className="p-6 sm:p-8">
         <div className="mb-6 flex items-center justify-between">
           {step === 'otp'
-            ? <button type="button" onClick={back} className="-ml-2 inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100"><ArrowLeft size={16} />Back</button>
+            ? <button type="button" onClick={back} className="-ml-2 inline-flex h-10 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100"><ArrowLeft size={16} />Back</button>
             : <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.08em] text-indigo-600"><ShieldCheck size={16} />Askus Insurance</span>}
-          <button type="button" aria-label="Close" onClick={close} className="-mr-2 grid size-9 place-items-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"><X size={18} /></button>
+          <button type="button" aria-label="Close" onClick={close} className="-mr-2 grid size-10 place-items-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"><X size={18} /></button>
         </div>
 
         {step === 'phone' && !google && (
@@ -129,8 +129,8 @@ export default function AuthModal({ onClose }: { onClose: (reason?: 'done' | 'ca
             {error && <p role="alert" className="mt-3 text-sm text-rose-700">{error}</p>}
             <Button type="submit" variant="primary" loading={busy} disabled={code.length < 6} className="mt-5 h-12 w-full text-[15px]">{busy ? 'Verifying…' : google ? 'Verify and continue' : 'Verify and sign in'}</Button>
             <div className="mt-5 flex items-center justify-between text-sm text-zinc-500">
-              <button type="button" onClick={back} className="font-medium text-zinc-600 hover:text-zinc-900">Change number</button>
-              <button type="button" onClick={resend} disabled={cooldown > 0 || busy} className="font-medium text-indigo-600 hover:underline disabled:text-zinc-400 disabled:no-underline">
+              <button type="button" onClick={back} className="-my-2.5 py-2.5 font-medium text-zinc-600 hover:text-zinc-900">Change number</button>
+              <button type="button" onClick={resend} disabled={cooldown > 0 || busy} className="-my-2.5 py-2.5 font-medium text-indigo-600 hover:underline disabled:text-zinc-400 disabled:no-underline">
                 {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP'}
               </button>
             </div>

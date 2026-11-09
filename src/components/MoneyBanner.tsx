@@ -60,7 +60,7 @@ export default function MoneyBanner({ variant, label, stat, caption }: { variant
     <span className="relative block h-28 overflow-hidden"
       style={{ background: online ? 'linear-gradient(135deg,#4338ca 0%,#4f46e5 55%,#7c3aed 100%)' : 'linear-gradient(135deg,#047857 0%,#059669 55%,#10b981 100%)' }}>
       <span className="relative z-10 flex h-full max-w-[50%] flex-col justify-center pl-5">
-        <span className="block text-[10px] font-semibold uppercase tracking-[.12em] text-white/75">{label}</span>
+        <span className="block text-[11px] font-semibold uppercase tracking-[.12em] text-white/75">{label}</span>
         <span className="mt-1 block text-[34px] font-extrabold leading-none tracking-tight text-white">{stat}</span>
         <span className="mt-1.5 block text-[12px] leading-snug text-white/85">{caption}</span>
       </span>

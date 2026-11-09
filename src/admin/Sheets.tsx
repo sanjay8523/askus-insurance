@@ -59,7 +59,7 @@ export function RequestSheet({ rec, admin, onClose }: { rec: Rec; admin: string;
         <div role="radiogroup" aria-label="Status" className="mb-3 grid grid-cols-5 gap-1 rounded-lg bg-zinc-100 p-0.5 text-xs font-medium">
           {STATUSES.map((s) => (
             <button key={s} type="button" role="radio" aria-checked={status === s} onClick={() => setStatus(s)}
-              className={cn('rounded-md px-1 py-1.5 capitalize transition-colors max-md:py-2.5', status === s ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-800')}>{s}</button>
+              className={cn('rounded-md px-1 py-1.5 capitalize transition-colors max-md:min-h-10', status === s ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-800')}>{s}</button>
           ))}
         </div>
         <Field label="Message to customer and team" hint="Customers see this note under their request.">

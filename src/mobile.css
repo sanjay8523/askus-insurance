@@ -1,0 +1,92 @@
+/*
+ * Phone fixes for the home page (legacy.css). Loaded after legacy.css, so these rules win.
+ * legacy.css shrinks a lot of text on small screens (down to 6-11px) and makes several buttons and links
+ * 21-32px tall. On phones text stays readable (at least ~11px, body copy 13px) and anything tappable is about
+ * 40px or more, as phone guidelines recommend.
+ */
+
+/* The account button stays on one line ("My Account (Rajesh)"), at every screen size. */
+#account-button { white-space: nowrap; }
+
+/* iPhones zoom the page when a field with text under 16px is tapped: inputs use 16px on phones and tablets. */
+@media (max-width: 1024px) {
+  .doc-upload-form input[type='text'],
+  .doc-upload-form input[type='tel'],
+  .doc-upload-form select,
+  .doc-upload-form textarea,
+  .quote-toolbar select {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 850px) {
+  .service-grid b { font-size: 12px; }
+  .service-grid small { font-size: 11px; }
+  .editorial-grid span { font-size: 12px; }
+  .advantage-grid h3 { font-size: 13px; }
+  .advantage-grid p { font-size: 12px; }
+}
+
+@media (max-width: 600px) {
+  /* header */
+  .brand-com { font-size: 10px; }
+  .mobile-toggle { width: 44px; height: 44px; margin-left: -8px; align-items: center; justify-content: center; }
+  .header-actions .outline-button { min-height: 40px; padding: 8px 14px; font-size: 13px; white-space: nowrap; }
+  .account-name { display: none; } /* "My Account (Rajesh)" → "My Account" so the header stays on one line */
+
+  /* section text */
+  .eyebrow { font-size: 11px; letter-spacing: 1.2px; }
+  .section-heading p,
+  .section-heading .text-link { font-size: 13px; }
+  .service-grid b { font-size: 13px; }
+  .service-grid small { font-size: 12px; }
+  .trust-grid p { font-size: 13px; }
+  .source-note { font-size: 11px; }
+  .question-list > button { font-size: 13px; padding: 14px; }
+  .calculator-grid small,
+  .calculator-grid .text-link { font-size: 12px; }
+  .advantage-grid h3 { font-size: 13px; }
+  .advantage-grid p { font-size: 12px; }
+  .partner-grid small { font-size: 10px; letter-spacing: 0.3px; }
+  .help-inner p { font-size: 13px; }
+  .also-buy > span { font-size: 11px; }
+  .also-buy button,
+  .additional-products button { font-size: 12px; min-height: 40px; }
+  .modal-note,
+  .quote-features,
+  .compare-bar,
+  .compare-table { font-size: 12px; }
+  .toast { font-size: 13px; }
+
+  /* things to tap */
+  .text-link { min-height: 40px; }
+  .review-controls .icon-button,
+  .modal-header .icon-button { width: 40px; height: 40px; }
+  .help-actions button { min-height: 44px; padding: 10px 16px; font-size: 13px; }
+
+  /* footer */
+  .footer-top .text-link { font-size: 12px; }
+  .footer-links button,
+  .footer-links a { font-size: 13px; display: flex; align-items: center; min-height: 40px; padding: 0; }
+  .footer-payment > span { font-size: 12px; }
+  .legal p,
+  .footer-bottom { font-size: 11px; }
+  .footer-bottom a { display: inline-flex; align-items: center; min-height: 40px; }
+  .footer-payment b { font-size: 12px; }
+  .ai-section small,
+  .app-section small { font-size: 12px; }
+  .brand small { font-size: 10px; letter-spacing: 0.5px; }
+
+  /* the help button is a round icon on phones, so it covers less of the page */
+  .chat-launcher { width: 52px; height: 52px; padding: 0; justify-content: center; border-radius: 999px; }
+  .chat-launcher > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* Small phones (iPhone SE, folding phones): a slightly smaller logo and "Account" so the header fits on one line. */
+@media (max-width: 360px) {
+  .brand > span { font-size: 20px; }
+  .brand small { display: none; }
+  .account-my { display: none; }
+  .header-actions .outline-button { padding: 8px 12px; }
+  .mobile-toggle { width: 40px; }
+}

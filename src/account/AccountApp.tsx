@@ -28,7 +28,7 @@ const STEP: Record<string, string> = {
   closed: 'This request is closed.',
 }
 const FLOW = ['new', 'contacted', 'quoted', 'issued'] as const
-const FLOW_LABEL = { new: 'Received', contacted: 'Contacted', quoted: 'Quotes shared', issued: 'Issued' }
+const FLOW_LABEL = { new: 'Received', contacted: 'Contacted', quoted: 'Quoted', issued: 'Issued' }
 
 type TabId = 'overview' | 'requests' | 'documents' | 'profile'
 const TABS: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [

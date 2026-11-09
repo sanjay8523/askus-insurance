@@ -89,7 +89,7 @@ export function MobileDrawer({ open, onClose, path, go, newCount }: { open: bool
     return () => { document.removeEventListener('keydown', key); document.body.style.overflow = '' }
   }, [open, onClose])
   return (
-    <div className={cn('fixed inset-0 z-50 md:hidden', open ? '' : 'pointer-events-none')} aria-hidden={!open}>
+    <div className={cn('fixed inset-0 z-50 md:hidden', open ? '' : 'pointer-events-none')} aria-hidden={!open} inert={!open}>
       <button tabIndex={-1} aria-label="Close menu" onClick={onClose} className={cn('absolute inset-0 bg-zinc-900/40 transition-opacity duration-200', open ? 'opacity-100' : 'opacity-0')} />
       <aside role="dialog" aria-modal="true" aria-label="Navigation" className={cn('absolute inset-y-0 left-0 flex w-[280px] max-w-[85vw] flex-col bg-white shadow-2xl transition-transform duration-200 ease-out', open ? 'translate-x-0' : '-translate-x-full')}>
         <div className="flex h-14 items-center justify-between border-b border-zinc-100 px-4"><Brand /><button type="button" onClick={onClose} aria-label="Close menu" className="grid size-11 place-items-center rounded-lg text-zinc-500 hover:bg-zinc-100"><X size={18} /></button></div>

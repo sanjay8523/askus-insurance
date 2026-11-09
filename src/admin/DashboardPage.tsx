@@ -102,7 +102,7 @@ export default function DashboardPage({ d, email, go, onOpen }: { d: Data; email
           <CardHeader title="Requests received" hint={`${rangeTotal} in the last ${range} days`}
             action={
               <div role="group" aria-label="Chart range" className="flex rounded-lg bg-zinc-100 p-0.5 text-xs font-medium">
-                {([7, 14, 30] as const).map((r) => <button key={r} type="button" aria-pressed={range === r} onClick={() => setRange(r)} className={cn('rounded-md px-2.5 py-1 transition-colors max-md:py-2', range === r ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-800')}>{r}d</button>)}
+                {([7, 14, 30] as const).map((r) => <button key={r} type="button" aria-pressed={range === r} onClick={() => setRange(r)} className={cn('rounded-md px-2.5 py-1 transition-colors max-md:min-h-10 max-md:px-3.5', range === r ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-800')}>{r}d</button>)}
               </div>} />
           <div className="px-5 pb-4 pt-3">{L ? <Skeleton className="h-52 w-full" /> : <DailyBars days={days} names={['Offline insurance', 'Document uploads']} />}</div>
         </Card>

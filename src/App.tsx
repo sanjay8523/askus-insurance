@@ -256,7 +256,7 @@ export default function App() {
                     </a>
                   </div>
                 </div>
-                <button className="outline-button" data-action="signin" id="account-button">{user ? `My Account (${user.displayName?.split(' ')[0] ?? 'you'})` : 'Sign In'}</button>
+                <button className="outline-button" data-action="signin" id="account-button">{user ? <span><span className="account-my">My </span>Account<span className="account-name"> ({user.displayName?.split(' ')[0] ?? 'you'})</span></span> : 'Sign In'}</button>
               </div>
             </div>
           </header>

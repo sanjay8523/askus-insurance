@@ -88,7 +88,7 @@ export default function IdvCalculator({ vehicle, isNew, registrationDate, manufa
             <span className="mt-1.5 block text-xs text-zinc-500">{Number(value) ? rupees(Number(value)) : 'Your last policy shows the IDV it was insured for.'}</span>
           </label>
         )}
-        <button type="button" onClick={() => { setDirect(!direct); onChange(''); setPrice(''); setAccessories('') }} className="text-sm font-medium text-indigo-600 hover:underline">
+        <button type="button" onClick={() => { setDirect(!direct); onChange(''); setPrice(''); setAccessories('') }} className="-my-2 py-2.5 text-left text-sm font-medium text-indigo-600 hover:underline">
           {direct ? 'Use the calculator instead' : 'Already know your IDV? Enter it directly'}
         </button>
       </div>

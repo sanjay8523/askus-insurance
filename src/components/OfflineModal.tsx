@@ -66,6 +66,19 @@ export default function OfflineModal({ type, onClose }: { type: OfflineType; onC
     warmUpReader() // start loading the document reader while the customer types the number
     return () => d.close()
   }, [])
+  // the form can open before sign-in has finished loading (e.g. from a link): fill the contact details once it has
+  useEffect(() => {
+    if (!user) return
+    const cur = fRef.current
+    const free = (k: 'name' | 'mobile' | 'email') => !cur[k] && !touched.current.has(k)
+    const mobile = (user.phoneNumber ?? '').replace(/^\+91/, '')
+    const add: Partial<OfflineForm> = {
+      ...(free('name') && user.displayName ? { name: user.displayName } : {}),
+      ...(free('mobile') && mobile ? { mobile } : {}),
+      ...(free('email') && user.email ? { email: user.email } : {}),
+    }
+    if (Object.keys(add).length) { fRef.current = { ...cur, ...add }; setF((p) => ({ ...p, ...add })) }
+  }, [user])
   useEffect(() => {
     dlg.current?.scrollTo({ top: 0 })
     dlg.current?.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true })

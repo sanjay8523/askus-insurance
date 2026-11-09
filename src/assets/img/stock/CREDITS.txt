@@ -1,0 +1,5 @@
+Photos in this folder come from Pexels (https://www.pexels.com/license/ : free to use, including commercially, no attribution required).
+They were edited: background removed, a third-party logo painted out and a number plate blurred.
+
+auto.webp        Pexels photo 35378834  https://www.pexels.com/photo/colorful-indian-auto-rickshaw-parked-outdoors-35378834/
+commercial.webp  Pexels photo 29057946  https://www.pexels.com/photo/heavy-cargo-trucks-on-indian-highway-29057946/

@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react'
-import { ArrowRight, BadgeIndianRupee, CarTaxiFront, Clock3, ShieldCheck, Truck } from 'lucide-react'
+import { ArrowRight, BadgeIndianRupee, Clock3, ShieldCheck } from 'lucide-react'
 import { PlateInput, Segmented } from '../offline/parts'
 import { OFFLINE_CASHBACK, emptyForm, validateStep, type OfflineType } from '../../lib/offline'
 import { describeReg, formatReg } from '../../lib/vehicle'
 import { PRODUCTS, inr } from '../../lib/products'
 import { cn } from '../../ui'
 import cardCar from '../../assets/img/acko/card-car.webp'
+import cardAuto from '../../assets/img/stock/auto.webp'
+import cardCommercial from '../../assets/img/stock/commercial.webp'
 import cardBike from '../../assets/img/acko/card-bike.webp'
 import cardHealth from '../../assets/img/acko/card-health.webp'
 import cardTerm from '../../assets/img/acko/card-term.webp'
@@ -78,23 +80,24 @@ export function Hero({ onSearch }: { onSearch: (type: OfflineType, reg: string) 
 const TILES: Record<string, { img: string; tint: string }> = {
   car: { img: cardCar, tint: '#e9f0fb' },
   bike: { img: cardBike, tint: '#e9f5ee' },
+  auto: { img: cardAuto, tint: '#fdf3e0' },
+  commercial: { img: cardCommercial, tint: '#edf0f5' },
   health: { img: cardHealth, tint: '#fdeef1' },
   term: { img: cardTerm, tint: '#f2eefb' },
 }
 
 export function ProductTiles() {
   const photo = PRODUCTS.filter((p) => TILES[p.id])
-  const slim = PRODUCTS.filter((p) => !TILES[p.id])
   return (
     <section id="products" className="app-root scroll-mt-24" aria-labelledby="tiles-title">
       <div className="mx-auto max-w-[1140px] px-4 py-12 sm:px-6 sm:py-16">
         <h2 id="tiles-title" className="mb-0 text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">Choose the cover you need</h2>
         <p className="mt-2 text-[15px] text-zinc-500">Pick a product to compare plans online or let our team handle it.</p>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
           {photo.map((p) => (
             <button key={p.id} type="button" data-product={p.id} className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white text-left transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-[0_12px_30px_-12px_rgba(16,24,40,.22)]">
-              <span className="relative block h-36 sm:h-48" style={{ background: TILES[p.id].tint }}>
+              <span className="relative block h-36 sm:h-48 lg:h-56" style={{ background: TILES[p.id].tint }}>
                 <img src={TILES[p.id].img} alt="" loading="lazy" decoding="async" className="absolute bottom-0 right-0 h-full w-full object-contain object-bottom p-2 transition-transform duration-300 group-hover:scale-[1.03] sm:p-3" />
               </span>
               <span className="flex flex-1 flex-col p-3.5 sm:p-4">
@@ -109,18 +112,6 @@ export function ProductTiles() {
           ))}
         </div>
 
-        <div className="mt-3 grid gap-3 sm:mt-4 sm:grid-cols-2 sm:gap-4">
-          {slim.map((p) => {
-            const Icon = p.id === 'commercial' ? Truck : CarTaxiFront
-            return (
-              <button key={p.id} type="button" data-product={p.id} className="group flex items-center gap-4 rounded-2xl border border-zinc-200 bg-white p-4 text-left transition-colors hover:border-zinc-300">
-                <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-700"><Icon size={24} /></span>
-                <span className="min-w-0 flex-1"><span className="block text-[15px] font-semibold text-zinc-900">{p.name}</span><span className="block text-sm text-zinc-500">{p.tag}{p.startingAt ? ` · from ${inr(p.startingAt)}*` : ''}</span></span>
-                <ArrowRight size={18} className="shrink-0 text-zinc-400 transition-transform group-hover:translate-x-0.5" />
-              </button>
-            )
-          })}
-        </div>
         <p className="mt-5 text-xs leading-relaxed text-zinc-400">*Starting third-party premium before 18% GST. Motor tiles show the lowest figure for the category; your actual premium depends on the vehicle, engine size and insurer.</p>
       </div>
     </section>

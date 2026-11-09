@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 /**
- * Dev only: serves the Cloudflare Pages Functions under /api/documents/* straight from `npm run dev`,
+ * Dev only: serves the Cloudflare Pages Functions under /api/documents/* and /api/ocr/* straight from `npm run dev`,
  * using the secrets in .dev.vars. In production Cloudflare runs the same files from /functions.
  */
 function devFunctions(): Plugin {
@@ -12,7 +12,7 @@ function devFunctions(): Plugin {
     name: 'dev-pages-functions',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use('/api/documents', async (req, res, next) => {
+      for (const group of ['documents', 'ocr']) server.middlewares.use(`/api/${group}`, async (req, res, next) => {
         try {
           const name = (req.url ?? '').split('?')[0].replace(/^\/|\/$/g, '')
           if (!/^[a-z-]+$/.test(name) || req.method !== 'POST') return next()
@@ -25,7 +25,7 @@ function devFunctions(): Plugin {
           } catch { /* no .dev.vars */ }
           const chunks: Buffer[] = []
           for await (const c of req) chunks.push(c as Buffer)
-          const mod = await server.ssrLoadModule(`/functions/api/documents/${name}.ts`)
+          const mod = await server.ssrLoadModule(`/functions/api/${group}/${name}.ts`)
           const request = new Request(`http://localhost${req.originalUrl ?? req.url}`, {
             method: 'POST',
             headers: req.headers as Record<string, string>,

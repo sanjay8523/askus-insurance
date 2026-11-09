@@ -72,7 +72,7 @@ function OpenDoc({ id, name }: { id: string; name: string }) {
 const FileRow = ({ d }: { d: NonNullable<Req['documents']>[number] }) => (
   <li className="flex items-center gap-3 rounded-lg border border-zinc-200 p-3">
     <span className="grid size-9 shrink-0 place-items-center rounded-md bg-zinc-100 text-zinc-500"><FileText size={17} /></span>
-    <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-zinc-900">{d.name}</span>{d.size ? <span className="block text-xs text-zinc-500">{kb(d.size)}</span> : null}</span>
+    <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-zinc-900">{d.name}</span>{d.size ? <span className="block text-xs text-zinc-500">{d.kind ? `${d.kind === 'rc' ? 'RC' : 'Policy'} · ` : ''}{kb(d.size)}</span> : null}</span>
     <OpenDoc id={d.publicId} name={d.name} />
   </li>
 )

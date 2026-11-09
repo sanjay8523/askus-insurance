@@ -20,7 +20,7 @@ export function DocRow({ d }: { d: DocRef }) {
   return (
     <li className="flex items-center gap-3 rounded-lg border border-zinc-200 p-3">
       <span className="grid size-9 shrink-0 place-items-center rounded-md bg-zinc-100 text-zinc-500"><FileText size={17} /></span>
-      <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-zinc-900">{d.name}</span><span className="block text-xs uppercase text-zinc-500">{d.format} · {kb(d.size)}</span></span>
+      <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-zinc-900">{d.name}</span><span className="block text-xs uppercase text-zinc-500">{d.kind ? `${d.kind === 'rc' ? 'RC' : 'Policy'} · ` : ''}{d.format} · {kb(d.size)}</span></span>
       <Button size="sm" icon={ExternalLink} loading={busy} onClick={open}>Open</Button>
     </li>
   )
@@ -74,7 +74,7 @@ export function RequestSheet({ rec, admin, onClose }: { rec: Rec; admin: string;
           <Section title="Previous policy"><Props rows={entries(rec.policy)} /></Section>
           <Section title="Quote preferences"><Props rows={[
             ['Insurers', rec.plan?.insurers?.length ? rec.plan.insurers.join(', ') : 'Compare all'], ['Add-ons', rec.plan?.addons?.join(', ')],
-            ['Preferred IDV', rec.plan?.preferredIdv], ['AyushPay interest', rec.plan?.ayushPay ?? false],
+            ['Preferred IDV', rec.plan?.preferredIdv], ['Ex-showroom price', (rec.plan as Record<string, unknown> | undefined)?.exShowroom as string | undefined], ['Accessories value', (rec.plan as Record<string, unknown> | undefined)?.accessoriesValue as string | undefined], ['AyushPay interest', rec.plan?.ayushPay ?? false],
           ]} /></Section>
         </>
       ) : (

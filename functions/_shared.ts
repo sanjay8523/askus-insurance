@@ -4,6 +4,8 @@ export interface CloudflareEnv {
   CLOUDINARY_API_KEY: string
   CLOUDINARY_API_SECRET: string
   ADMIN_ALLOWED_EMAILS?: string
+  /** Google Cloud Vision API key, restricted to the Vision API. Enables reading RC and policy documents. */
+  GOOGLE_VISION_API_KEY?: string
 }
 
 export interface FirebaseIdentity {

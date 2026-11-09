@@ -1,10 +1,10 @@
 import { useRef, useState, type ReactNode } from 'react'
-import { Check, ChevronDown, FileText, Pencil, UploadCloud, X } from 'lucide-react'
+import { Check, ChevronDown, FileText, Pencil, Sparkles, UploadCloud, X } from 'lucide-react'
 import { cn } from '../../ui'
 
 /** Presentational building blocks for the offline insurance journey. No business logic lives here. */
 
-export const STEPS = ['Vehicle', 'Details', 'Plan', 'Owner', 'Review'] as const
+export const STEPS = ['Vehicle', 'Details', 'IDV & owner'] as const
 
 /** Shared control look: 44px tall for easy touch, hairline border, indigo focus ring. */
 export const ctl = 'block w-full h-11 rounded-lg border border-zinc-300 bg-white px-3.5 text-base text-zinc-900 placeholder:text-zinc-400 hover:border-zinc-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/15 disabled:bg-zinc-50 disabled:text-zinc-500 sm:text-[15px]'
@@ -20,10 +20,10 @@ export function Group({ title, hint, children }: { title: string; hint?: string;
   )
 }
 
-export function Row({ label, hint, optional, children }: { label: string; hint?: string; optional?: boolean; children: ReactNode }) {
+export function Row({ label, hint, optional, badge, children }: { label: string; hint?: string; optional?: boolean; badge?: ReactNode; children: ReactNode }) {
   return (
     <label className="block min-w-0">
-      <span className="mb-1.5 flex items-baseline justify-between gap-2 text-sm font-medium text-zinc-800">{label}{optional && <span className="text-xs font-normal text-zinc-400">Optional</span>}</span>
+      <span className="mb-1.5 flex items-center justify-between gap-2 text-sm font-medium text-zinc-800"><span className="flex items-center gap-2">{label}{badge}</span>{optional && <span className="text-xs font-normal text-zinc-400">Optional</span>}</span>
       {children}
       {hint && <span className="mt-1.5 block text-xs text-zinc-500">{hint}</span>}
     </label>
@@ -32,8 +32,18 @@ export function Row({ label, hint, optional, children }: { label: string; hint?:
 
 export const Two = ({ children }: { children: ReactNode }) => <div className="grid gap-4 sm:grid-cols-2">{children}</div>
 
-export function Question({ label, children }: { label: string; children: ReactNode }) {
-  return <div><p className="mb-2 text-sm font-medium text-zinc-800">{label}</p>{children}</div>
+export function Question({ label, badge, children }: { label: string; badge?: ReactNode; children: ReactNode }) {
+  return <div><p className="mb-2 flex items-center gap-2 text-sm font-medium text-zinc-800">{label}{badge}</p>{children}</div>
+}
+
+/** Small "filled from your RC / policy" marker next to a field. */
+export function AutoTag({ from }: { from?: 'rc' | 'policy' | 'lookup' }) {
+  if (!from) return null
+  return (
+    <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-inset ring-violet-200">
+      <Sparkles size={11} />{from === 'policy' ? 'From policy' : from === 'rc' ? 'From RC' : 'Auto-filled'}
+    </span>
+  )
 }
 
 export function Segmented<T extends string>({ label, value, options, onChange }: { label: string; value: T | ''; options: readonly T[]; onChange: (v: T) => void }) {

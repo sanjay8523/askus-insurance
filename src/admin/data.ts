@@ -9,7 +9,7 @@ export const isAdminEmail = (e: string | null | undefined) => Boolean(e && ADMIN
 export const STATUSES = ['new', 'contacted', 'quoted', 'issued', 'closed'] as const
 export type Status = (typeof STATUSES)[number]
 
-export type DocRef = { name: string; size: number; mimeType: string; publicId: string; format: string }
+export type DocRef = { name: string; size: number; mimeType: string; publicId: string; format: string; kind?: 'rc' | 'policy' }
 export type Rec = {
   id: string; kind: 'offline' | 'upload'
   uid?: string; createdAt?: Timestamp; status?: string; adminNote?: string; updatedBy?: string; updatedAt?: Timestamp

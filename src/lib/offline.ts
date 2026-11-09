@@ -4,19 +4,8 @@ import { uploadDocument, type UploadedDoc } from './cloudinary'
 import { normMobile } from './validate'
 import { describeReg } from './vehicle'
 
-export type OfflineType = 'car' | 'bike'
-
-/** "Up to" cashback shown for offline requests. */
-export const OFFLINE_CASHBACK: Record<OfflineType, number> = { car: 500, bike: 300 }
-
-export const INSURERS = [
-  'Acko General', 'Bajaj Allianz', 'Cholamandalam MS', 'Digit', 'Future Generali', 'HDFC ERGO', 'ICICI Lombard',
-  'IFFCO Tokio', 'Kotak General', 'Liberty General', 'National Insurance', 'New India Assurance', 'Oriental Insurance',
-  'Raheja QBE', 'Reliance General', 'Royal Sundaram', 'SBI General', 'Shriram General', 'Tata AIG', 'United India',
-  'Universal Sompo', 'Zuno General', 'Other / not sure',
-]
-export const PREV_POLICY_TYPES = ['Comprehensive', 'Third Party', 'Own Damage only', 'Not sure']
-export const NCB_OPTIONS = ['0%', '20%', '25%', '35%', '45%', '50%']
+export { INSURERS, NCB_OPTIONS, OFFLINE_CASHBACK, PREV_POLICY_TYPES, type OfflineType } from './offlineConsts'
+import { OFFLINE_CASHBACK, type OfflineType } from './offlineConsts'
 
 export type OfflineForm = {
   // step 1: vehicle number
@@ -41,6 +30,10 @@ export type OfflineForm = {
   insurers: string[]
   addons: string[]
   idv: string
+  /** IDV calculator inputs, sent to the team with the request. */
+  exShowroom: string
+  accessoriesValue: string
+  idvMode: 'calc' | 'direct'
   ayushPay: boolean
   // owner (proposal form)
   name: string
@@ -51,6 +44,8 @@ export type OfflineForm = {
   city: string
   pincode: string
   onLoan: 'Yes' | 'No'
+  /** Where the address came from: read from the RC, a new address the customer typed, or typed with no RC address found. */
+  addressSource: 'rc' | 'new' | 'manual'
   // step 4
   consent: boolean
 }
@@ -60,8 +55,8 @@ export const emptyForm = (): OfflineForm => ({
   makeModel: '', variant: '', fuel: 'Petrol', registrationDate: '', manufactureMonth: '',
   policyType: 'Comprehensive', expiredOver90: 'No', prevPolicyType: '', prevInsurer: '', prevExpiry: '',
   claimMade: 'No', ncb: '0%', ownerType: 'Individual', ownershipChanged: 'No',
-  insurers: [], addons: [], idv: '', ayushPay: false,
-  name: '', gender: '', mobile: '', email: '', address: '', city: '', pincode: '', onLoan: 'No',
+  insurers: [], addons: [], idv: '', exShowroom: '', accessoriesValue: '', idvMode: 'calc', ayushPay: false,
+  name: '', gender: '', mobile: '', email: '', address: '', city: '', pincode: '', onLoan: 'No', addressSource: 'manual',
   consent: false,
 })
 
@@ -89,23 +84,26 @@ export function validateStep(step: number, f: OfflineForm): string | null {
     return null
   }
   if (step === 3) {
+    if (f.policyType === 'Comprehensive' && !(Number(f.idv) >= 10000)) return 'Work out your IDV with the calculator, or enter the IDV you want.'
     if (f.name.trim().length < 2 || !/^[\p{L}][\p{L} .'-]*$/u.test(f.name.trim())) return "Enter the owner's full name as on the RC."
     if (!f.gender) return "Select the owner's gender."
     if (!/^[6-9]\d{9}$/.test(normMobile(f.mobile))) return 'Enter a valid 10-digit mobile number.'
-    if (f.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) return 'Enter a valid email address.'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) return 'Enter your email address.'
     if (f.address.trim().length < 5) return 'Enter the address for communication.'
     if (f.city.trim().length < 2) return 'Enter the city.'
     if (!/^\d{6}$/.test(f.pincode.trim())) return 'Enter a valid 6-digit pincode.'
+    if (!f.consent) return 'Please accept the declaration to continue.'
     return null
   }
-  if (step === 4 && !f.consent) return 'Please accept the declaration to continue.'
   return null
 }
 
-export async function submitOfflineRequest(uid: string, type: OfflineType, f: OfflineForm, files: File[]) {
+export type OfflineDoc = { kind: 'rc' | 'policy'; file: File }
+
+export async function submitOfflineRequest(uid: string, type: OfflineType, f: OfflineForm, docs: OfflineDoc[]) {
   const requestId = crypto.randomUUID()
-  const documents: UploadedDoc[] = []
-  for (const [i, file] of files.entries()) documents.push(await uploadDocument(requestId, i, file))
+  const documents: (UploadedDoc & { kind: OfflineDoc['kind'] })[] = []
+  for (const [i, d] of docs.entries()) documents.push({ ...(await uploadDocument(requestId, i, d.file)), kind: d.kind })
   const t = (v: string) => v.trim()
   await setDoc(doc(db, 'offlineRequests', requestId), {
     uid,
@@ -116,7 +114,7 @@ export async function submitOfflineRequest(uid: string, type: OfflineType, f: Of
     createdAt: serverTimestamp(),
     applicant: {
       name: t(f.name), gender: f.gender, mobile: normMobile(f.mobile), email: t(f.email),
-      address: t(f.address), city: t(f.city), pincode: t(f.pincode), onLoan: f.onLoan,
+      address: t(f.address), city: t(f.city), pincode: t(f.pincode), onLoan: f.onLoan, addressSource: f.addressSource,
     },
     vehicle: {
       isNew: f.isNew, regNumber: f.isNew ? '' : normReg(f.regNumber), makeModel: t(f.makeModel), variant: t(f.variant),
@@ -127,21 +125,13 @@ export async function submitOfflineRequest(uid: string, type: OfflineType, f: Of
       prevInsurer: f.prevInsurer, prevExpiry: f.prevExpiry, claimMade: f.claimMade, ncb: f.ncb,
       ownerType: f.ownerType, ownershipChanged: f.ownershipChanged,
     },
-    plan: { insurers: f.insurers, addons: f.addons, preferredIdv: f.idv.trim(), ayushPay: f.ayushPay },
+    plan: {
+      insurers: f.insurers, addons: f.addons, preferredIdv: f.idv.trim(), ayushPay: f.ayushPay,
+      idvMode: f.policyType === 'Comprehensive' ? f.idvMode : '', exShowroom: f.idvMode === 'calc' ? f.exShowroom : '', accessoriesValue: f.idvMode === 'calc' ? f.accessoriesValue : '',
+    },
     documents,
   })
   return requestId
 }
 
-/** Insurers shown on the quotes step (ids are the logo ids in the partner's image set). */
-export const QUOTE_INSURERS: { id: number; name: string }[] = [
-  { id: 139, name: 'United India Insurance' },
-  { id: 107, name: 'The New India Assurance' },
-  { id: 145, name: 'Shriram General Insurance' },
-  { id: 111, name: 'TATA AIG' },
-  { id: 194, name: 'ICICI Lombard' },
-  { id: 101, name: 'Bajaj Allianz General Insurance' },
-  { id: 151, name: 'Digit Insurance' },
-]
 export const ADDON_OPTIONS = ['Zero Depreciation', '24x7 Roadside Assistance', 'Engine Protection Cover', 'Consumables', 'Personal Accident Cover']
-export const insurerLogo = (id: number) => `https://static.pbcdn.in/pbp-cdn/tw/tw2.0/insurer/${id}.png`

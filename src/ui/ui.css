@@ -68,3 +68,12 @@
 .app-root svg[width="48"]{width:48px;height:48px}
 /* headings focused by script for screen readers should not draw a ring */
 .app-root [tabindex="-1"]:focus-visible { outline: none; }
+
+/* Offline offer bar: a soft light sweep and a gentle pulse on the gift icon */
+@keyframes offer-sheen { 0% { transform: translateX(-110%) } 60%, 100% { transform: translateX(110%) } }
+.offer-sheen { background: linear-gradient(100deg, transparent 25%, rgba(255,255,255,.22) 50%, transparent 75%); animation: offer-sheen 3.6s ease-in-out infinite; }
+@keyframes offer-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.5) } 60% { box-shadow: 0 0 0 7px rgba(255,255,255,0) } }
+.offer-pulse { animation: offer-pulse 2.4s ease-out infinite }
+@keyframes ai-spin { to { transform: rotate(360deg) } }
+.ai-ring { background: conic-gradient(from 0deg, #8b5cf6, #ec4899, #f59e0b, #8b5cf6); animation: ai-spin 1.6s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .offer-sheen, .offer-pulse, .ai-ring { animation: none } }

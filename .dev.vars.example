@@ -3,3 +3,4 @@ CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
 CLOUDINARY_API_KEY=your-cloudinary-api-key
 CLOUDINARY_API_SECRET=replace-with-cloudinary-api-secret
 ADMIN_ALLOWED_EMAILS=your-admin-1@example.com,your-admin-2@example.com
+GOOGLE_VISION_API_KEY=your-google-cloud-vision-api-key

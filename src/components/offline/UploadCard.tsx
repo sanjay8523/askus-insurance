@@ -13,7 +13,7 @@ function StatusLine({ e, what }: { e: ScannedFile; what: string }) {
       <span className="ai-ring relative grid size-3.5 place-items-center rounded-full"><span className="size-2.5 rounded-full bg-white" /></span>Reading your {what} with AI…
     </span>
   )
-  if (e.status === 'done') return <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700"><CheckCircle2 size={13} />{e.found} detail{e.found === 1 ? '' : 's'} filled in for you</span>
+  if (e.status === 'done') return <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700"><CheckCircle2 size={13} />{e.found ? `${e.found} detail${e.found === 1 ? '' : 's'} filled in for you` : 'Read. These details are already filled in.'}</span>
   const text = e.status === 'none' ? `Saved. We couldn't spot the details, you'll fill them next. A clearer, flat photo helps.`
     : e.status === 'locked' ? 'Saved. This PDF is password-protected, so we can\'t read it. You\'ll fill the details next.'
       : 'Saved. We couldn\'t read it automatically, you\'ll fill the details next.'

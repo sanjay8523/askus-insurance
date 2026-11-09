@@ -8,12 +8,14 @@
  *  1. resized so small print is big enough to read (long side 2000-2400px),
  *  2. straightened (phone photos are usually a few degrees tilted, which mixes up the rows),
  *  3. turned grey with the contrast stretched (shadows and uneven light).
- * Every text box is then read on its own and the lines are rebuilt from the box positions.
+ * Every text box is then read on its own and returned with its position.
  */
 import { PaddleOcrService, V6_TINY_MODEL, type FlattenedPaddleOcrResult } from 'ppu-paddle-ocr/web'
+import type { Cell } from './docLayout'
 
 export type WorkerRequest = { id: number; type: 'warm' } | { id: number; type: 'read'; image: ImageBitmap; rotate: 0 | 90 | 180 | 270 }
-export type WorkerReply = { id: number; ok: true; text: string; confidence: number } | { id: number; ok: false; error: string }
+/** Every piece of text read, with its box on the straightened picture (used to pair labels with values). */
+export type WorkerReply = { id: number; ok: true; cells: Cell[]; confidence: number } | { id: number; ok: false; error: string }
 
 const MIN_SIDE = 2000
 const MAX_SIDE = 2400
@@ -104,29 +106,18 @@ function clean(src: OffscreenCanvas) {
   return out
 }
 
-type Item = FlattenedPaddleOcrResult['results'][number]
-/** Rebuilds reading-order lines: boxes whose middles sit at the same height form one line, read left to right. */
-function linesFrom(items: Item[]) {
-  const sorted = items.filter((i) => i.text.trim()).map((i) => ({ ...i, cy: i.box.y + i.box.height / 2 })).sort((a, b) => a.cy - b.cy)
-  const rows: { cy: number; h: number; parts: typeof sorted }[] = []
-  for (const i of sorted) {
-    const row = rows.find((r) => Math.abs(r.cy - i.cy) < Math.min(r.h, i.box.height) * 0.55)
-    if (row) { row.parts.push(i); row.cy = (row.cy + i.cy) / 2 } else rows.push({ cy: i.cy, h: i.box.height, parts: [i] })
-  }
-  return rows.sort((a, b) => a.cy - b.cy).map((r) => r.parts.sort((a, b) => a.box.x - b.box.x).map((p) => p.text.trim()).join(' ')).join('\n')
-}
-
 const post = (r: WorkerReply) => (self as unknown as DedicatedWorkerGlobalScope).postMessage(r)
 
 self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
   const m = e.data
   try {
     const ocr = await service()
-    if (m.type === 'warm') return post({ id: m.id, ok: true, text: '', confidence: 0 })
+    if (m.type === 'warm') return post({ id: m.id, ok: true, cells: [], confidence: 0 })
     const canvas = clean(place(m.image, m.rotate))
     m.image.close()
     const r = (await ocr.recognize(canvas, { flatten: true, strategy: 'per-box', minimumConfidence: 0.3 })) as FlattenedPaddleOcrResult
-    post({ id: m.id, ok: true, text: linesFrom(r.results ?? []), confidence: r.confidence ?? 0 })
+    const cells = (r.results ?? []).filter((i) => i.text.trim()).map((i) => ({ text: i.text.trim(), x: i.box.x, y: i.box.y, w: i.box.width, h: i.box.height }))
+    post({ id: m.id, ok: true, cells, confidence: r.confidence ?? 0 })
   } catch (err) {
     post({ id: m.id, ok: false, error: err instanceof Error ? err.message : String(err) })
   }

@@ -83,21 +83,36 @@ export default function OfflineModal({ type, onClose }: { type: OfflineType; onC
   const step = screen === 'done' ? STEPS.length : ORDER.indexOf(screen)
   const cashback = inr(OFFLINE_CASHBACK[type])
 
-  /** Puts values read from documents into the form, except where the customer has typed something. */
-  function fill(updates: Partial<OfflineForm>, from: Source) {
+  /**
+   * Puts values read from documents into the form, except where the customer has typed something
+   * (or, with `onlyEmpty`, anywhere a value is already filled). Returns how many fields it filled.
+   */
+  function fill(updates: Partial<OfflineForm>, from: Source, onlyEmpty = false) {
     const cur = fRef.current
     const apply: Partial<OfflineForm> = {}
     for (const [k, v] of Object.entries(updates) as [keyof OfflineForm, OfflineForm[keyof OfflineForm]][]) {
       if (v === undefined || v === '') continue
       if (touched.current.has(k) && cur[k]) continue
+      if (onlyEmpty && cur[k] && k !== 'expiredOver90') continue
       ;(apply as Record<string, unknown>)[k] = v
     }
-    const keys = Object.keys(apply) as (keyof OfflineForm)[]
-    if (!keys.length) return
+    if (onlyEmpty && apply.expiredOver90 && !apply.prevExpiry) delete apply.expiredOver90 // follows the expiry date it was worked out from
+    const keys = (Object.keys(apply) as (keyof OfflineForm)[]).filter((k) => k !== 'addressSource' && k !== 'expiredOver90')
+    if (!Object.keys(apply).length) return 0
     fRef.current = { ...fRef.current, ...apply }
     setF((p) => ({ ...p, ...apply }))
-    setAuto((a) => ({ ...a, ...Object.fromEntries(keys.filter((k) => k !== 'addressSource').map((k) => [k, from])) }))
+    setAuto((a) => ({ ...a, ...Object.fromEntries(keys.map((k) => [k, from])) }))
+    return keys.length
   }
+
+  /** Previous-policy fields in the form's own wording (only values the dropdowns offer). */
+  const policyUpdates = (p: PolicyFields): Partial<OfflineForm> => ({
+    prevInsurer: p.prevInsurer && INSURERS.includes(p.prevInsurer) ? p.prevInsurer : undefined,
+    prevPolicyType: p.prevPolicyType && PREV_POLICY_TYPES.includes(p.prevPolicyType) ? p.prevPolicyType : undefined,
+    prevExpiry: p.prevExpiry,
+    expiredOver90: p.prevExpiry ? (Date.now() - new Date(p.prevExpiry).getTime() > 90 * 86400000 ? 'Yes' : 'No') : undefined,
+    ncb: p.ncb && NCB_OPTIONS.includes(p.ncb) ? p.ncb : undefined,
+  })
 
   function applyRc(r: RcFields) {
     setRcFound((prev) => {
@@ -105,25 +120,22 @@ export default function OfflineModal({ type, onClose }: { type: OfflineType; onC
       for (const [k, v] of Object.entries(r)) if (v && !n[k]) n[k] = v
       return n as RcFields
     })
-    fill({
+    let filled = fill({
       regNumber: r.regNumber ? formatReg(r.regNumber) : undefined,
       makeModel: r.makeModel, fuel: r.fuel, registrationDate: r.registrationDate, manufactureMonth: r.manufactureMonth,
       name: r.ownerName, gender: r.gender,
     }, 'rc')
     if ((r.address || r.city || r.pincode) && fRef.current.addressSource !== 'new') {
-      fill({ address: r.address, city: r.city, pincode: r.pincode, addressSource: 'rc' }, 'rc')
+      filled += fill({ address: r.address, city: r.city, pincode: r.pincode, addressSource: 'rc' }, 'rc')
     }
+    // mParivahan / DigiLocker RCs also show the insurer and "Insurance upto": use them unless the policy already did
+    if (r.prevExpiry || r.prevInsurer) filled += fill(policyUpdates({ prevExpiry: r.prevExpiry, prevInsurer: r.prevInsurer }), 'rc', true)
+    return filled
   }
 
   function applyPolicy(p: PolicyFields) {
-    const over90 = p.prevExpiry ? (Date.now() - new Date(p.prevExpiry).getTime() > 90 * 86400000 ? 'Yes' : 'No') : undefined
-    fill({
-      prevInsurer: p.prevInsurer && INSURERS.includes(p.prevInsurer) ? p.prevInsurer : undefined,
-      prevPolicyType: p.prevPolicyType && PREV_POLICY_TYPES.includes(p.prevPolicyType) ? p.prevPolicyType : undefined,
-      prevExpiry: p.prevExpiry, expiredOver90: over90,
-      ncb: p.ncb && NCB_OPTIONS.includes(p.ncb) ? p.ncb : undefined,
-    }, 'policy')
     if (p.regNumber) setPolicyReg(p.regNumber)
+    return fill(policyUpdates(p), 'policy')
   }
 
   /** Adds files and reads each one straight away. */
@@ -140,8 +152,9 @@ export default function OfflineModal({ type, onClose }: { type: OfflineType; onC
     setList((p) => [...p, ...entries])
     for (const e of entries) {
       void scanDocument(e.file, kind).then((r) => {
-        setList((p) => p.map((x) => (x.id === e.id ? { ...x, status: r.ok ? (r.found ? 'done' : 'none') : r.reason, found: r.ok ? r.found : 0 } : x)))
-        if (r.ok && r.found) { if (kind === 'rc') applyRc(r.fields); else applyPolicy(r.fields) }
+        // the count shown is what actually went into the form (not fields the customer already typed)
+        const filled = r.ok && r.found ? (kind === 'rc' ? applyRc(r.fields) : applyPolicy(r.fields)) : 0
+        setList((p) => p.map((x) => (x.id === e.id ? { ...x, status: r.ok ? (r.found ? 'done' : 'none') : r.reason, found: filled } : x)))
       })
     }
   }

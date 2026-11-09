@@ -2,9 +2,11 @@
  * Our own document reader. Everything runs on the customer's device and nothing is sent anywhere to be read:
  *  - Digital PDFs (mParivahan, DigiLocker, insurer e-policies): the text built into the PDF is read with pdf.js. Exact, instant.
  *  - Photos and scanned PDFs: PaddleOCR (open source) runs in a background worker in this tab.
- * The text is then handed to our own RC / policy parsers in rcParse.ts.
+ * Each piece of text keeps its position on the page, so rcParse.ts can pair every label with its value
+ * whether the value sits next to the label or under it.
  */
-import { countFound, parsePolicy, parseRc, type PolicyFields, type RcFields } from './rcParse'
+import { textOf } from './docLayout'
+import { countFound, extractPolicy, extractRc, type Cell, type PolicyFields, type RcFields } from './rcParse'
 import type { WorkerReply, WorkerRequest } from './ocrWorker'
 
 export type ScanKind = 'rc' | 'policy'
@@ -47,30 +49,29 @@ export function warmUpReader() {
   void ask({ type: 'warm' })
 }
 
-async function readPicture(image: ImageBitmap, rotate: 0 | 90 | 180 | 270 = 0): Promise<string | null> {
+async function readPicture(image: ImageBitmap, rotate: 0 | 90 | 180 | 270 = 0): Promise<Cell[] | null> {
   const copy = await createImageBitmap(image)
   const r = await ask({ type: 'read', image: copy, rotate }, [copy])
-  return r.ok ? r.text : null
+  return r.ok ? r.cells : null
 }
 
 /* ------------------------------ helpers ------------------------------ */
-const parse = (kind: ScanKind, text: string) => (kind === 'rc' ? parseRc(text) : parsePolicy(text)) as RcFields & PolicyFields
+type Fields = RcFields & PolicyFields
+const parse = (kind: ScanKind, cells: Cell[]) => (kind === 'rc' ? extractRc(cells) : extractPolicy(cells)) as Fields
 const letters = (s: string) => (s.match(/[A-Za-z0-9]/g) ?? []).length
 
 /** Reads a picture; if little is found it tries it turned sideways and upside down (photos are often taken rotated). */
 async function readBestRotation(kind: ScanKind, image: ImageBitmap) {
-  let best = { text: '', fields: {} as RcFields & PolicyFields, found: 0 }
-  let anyRead = false
+  let best: { cells: Cell[]; fields: Fields; found: number } | null = null
   for (const rotate of [0, 90, 270, 180] as const) {
-    const text = await readPicture(image, rotate)
-    if (text === null) { if (rotate === 0) return null; continue }
-    anyRead = true
-    const fields = parse(kind, text)
+    const cells = await readPicture(image, rotate)
+    if (cells === null) { if (rotate === 0) return null; continue }
+    const fields = parse(kind, cells)
     const found = countFound(fields)
-    if (found > best.found) best = { text, fields, found }
+    if (!best || found > best.found) best = { cells, fields, found }
     if (best.found >= 3) break
   }
-  return anyRead ? best : null
+  return best
 }
 
 /* ------------------------------ PDFs ------------------------------ */
@@ -90,18 +91,20 @@ async function openPdf(file: File): Promise<{ doc: PdfDoc; close: () => void } |
   }
 }
 
-/** Text built into a PDF page, rebuilt line by line (pieces on the same baseline joined left to right). */
-async function pageText(page: PdfPage) {
+/** The text built into a PDF page, each piece with its box (top-left origin), placed `top` units down the document. */
+async function pageCells(page: PdfPage, top: number) {
+  const viewport = page.getViewport({ scale: 1 })
   const content = await page.getTextContent()
-  const rows: { y: number; parts: { x: number; s: string }[] }[] = []
+  const cells: Cell[] = []
   for (const it of content.items) {
     if (!('str' in it) || !it.str.trim()) continue
-    const x = it.transform[4], y = it.transform[5]
-    const row = rows.find((r) => Math.abs(r.y - y) <= Math.max(2, (it.height || 8) * 0.4))
-    if (row) row.parts.push({ x, s: it.str })
-    else rows.push({ y, parts: [{ x, s: it.str }] })
+    const [a, b, c, d, e, f] = it.transform as number[]
+    if (Math.abs(b) > Math.abs(a)) continue // vertical text (stamps, margins)
+    const h = Math.hypot(c, d) || it.height || 10
+    const [x, y] = viewport.convertToViewportPoint(e, f)
+    cells.push({ text: it.str, x, y: top + y - h, w: it.width || it.str.length * h * 0.5, h })
   }
-  return rows.sort((a, b) => b.y - a.y).map((r) => r.parts.sort((a, b) => a.x - b.x).map((p) => p.s.trim()).join(' ')).join('\n')
+  return { cells, height: viewport.height }
 }
 
 async function renderPage(page: PdfPage) {
@@ -123,26 +126,34 @@ async function readPdf(kind: ScanKind, file: File): Promise<ScanOutcome> {
   if (opened === 'locked') return { ok: false, reason: 'locked' }
   const { doc, close } = opened
   try {
-    const pages = Math.min(doc.numPages, 4)
-    const texts: string[] = []
-    for (let i = 1; i <= pages; i++) texts.push(await pageText(await doc.getPage(i)))
-    const text = texts.join('\n')
-    if (letters(text) >= 40) {
-      const fields = parse(kind, text)
+    const all: Cell[] = []
+    let top = 0
+    for (let i = 1; i <= Math.min(doc.numPages, 4); i++) {
+      const { cells, height } = await pageCells(await doc.getPage(i), top)
+      all.push(...cells)
+      top += height + 40
+    }
+    if (letters(textOf(all)) >= 40) {
+      const fields = parse(kind, all)
       return { ok: true, fields, found: countFound(fields), via: 'pdf-text' }
     }
     // A scanned PDF (just pictures of pages): read the first two pages as pictures.
-    let best: { fields: RcFields & PolicyFields; found: number } | null = null
-    const ocrTexts: string[] = []
+    let best: { fields: Fields; found: number } | null = null
+    const pages: Cell[] = []
+    let offset = 0
     for (let i = 1; i <= Math.min(doc.numPages, 2); i++) {
       const bmp = await renderPage(await doc.getPage(i))
       const r = await readBestRotation(kind, bmp)
+      const pageHeight = Math.max(bmp.width, bmp.height)
       bmp.close()
-      if (r) { ocrTexts.push(r.text); if (!best || r.found > best.found) best = r }
+      if (!r) continue
+      if (!best || r.found > best.found) best = r
+      pages.push(...r.cells.map((c) => ({ ...c, y: c.y + offset })))
+      offset += pageHeight + 100
     }
     if (!best) return { ok: false, reason: 'failed' }
-    // RC front and back are often separate pages: parse both pages together as well and keep the better result.
-    const joined = parse(kind, ocrTexts.join('\n'))
+    // RC front and back are often separate pages: read both pages together as well and keep the better result.
+    const joined = parse(kind, pages)
     const joinedFound = countFound(joined)
     return joinedFound >= best.found ? { ok: true, fields: joined, found: joinedFound, via: 'ocr' } : { ok: true, fields: best.fields, found: best.found, via: 'ocr' }
   } finally {

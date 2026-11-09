@@ -25,7 +25,7 @@ const Heading = ({ step, title, sub }: { step: number; title: string; sub: strin
   </header>
 )
 
-export default function OfflineModal({ type, initialReg = '', onClose }: { type: OfflineType; initialReg?: string; onClose: () => void }) {
+export default function OfflineModal({ type, onClose }: { type: OfflineType; onClose: () => void }) {
   const { user } = useAuth()
   const noun = type === 'car' ? 'Car' : 'Bike'
   const vehicle = type === 'car' ? 'car' : 'bike'
@@ -35,7 +35,6 @@ export default function OfflineModal({ type, initialReg = '', onClose }: { type:
   const [usedVehicle, setUsedVehicle] = useState(false)
   const [f, setF] = useState<OfflineForm>(() => ({
     ...emptyForm(),
-    regNumber: formatReg(initialReg),
     name: user?.displayName ?? '',
     mobile: (user?.phoneNumber ?? '').replace(/^\+91/, ''),
     email: user?.email ?? '',

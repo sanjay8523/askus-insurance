@@ -8,7 +8,7 @@ import ModeChoice from './components/ModeChoice'
 import OfflineModal from './components/OfflineModal'
 import type { OfflineType } from './lib/offline'
 import Modal from './components/Modal'
-import { ClaimsBand, Hero, ProductTiles } from './components/home/HomeHero'
+import { ClaimsBand, ProductTiles } from './components/home/HomeHero'
 import { useAuth } from './context/AuthContext'
 import { auth, firebaseConfigured } from './lib/firebase'
 import { inr, PRODUCTS, type Product } from './lib/products'
@@ -65,8 +65,6 @@ export default function App() {
   const [choice, setChoice] = useState<Product | null>(null)
   const [offline, setOffline] = useState<OfflineType | null>(null)
   const [wantsOffline, setWantsOffline] = useState<OfflineType | null>(null)
-  /** Registration number typed into the home hero; passed on to the offline form. */
-  const [heroReg, setHeroReg] = useState('')
   // Dev-only shortcut for previewing the offline flow: http://localhost:5173/?offline=bike (stripped from production builds)
   useEffect(() => {
     if (!import.meta.env.DEV) return
@@ -90,10 +88,6 @@ export default function App() {
   useEffect(() => {
     if (user && afterLogin.current) { const run = afterLogin.current; afterLogin.current = null; run() }
   }, [user])
-  const heroSearch = (type: OfflineType, reg: string) => {
-    const p = PRODUCTS.find((x) => x.id === type)!
-    requireLogin(() => { setHeroReg(reg); setChoice(p) })
-  }
   const closeAuth = useCallback((reason?: 'done' | 'cancel') => {
     setAuthOpen(false)
     if (reason === 'cancel') afterLogin.current = null
@@ -159,7 +153,7 @@ export default function App() {
       // Car and bike: choose Online (partner journey) or Offline (our own form, processed by the team).
       // Same as the original preview: motor journeys open the partner page as the full page (it only works
       // reliably at the top level); health and term run inside the iframe dialog.
-      requireLogin(() => { setHeroReg(''); if (HAS_OFFLINE.has(p.id)) setChoice(p); else openOnline(p) })
+      requireLogin(() => { if (HAS_OFFLINE.has(p.id)) setChoice(p); else openOnline(p) })
       return
     }
     const review = t.closest<HTMLElement>('[data-review]')
@@ -267,7 +261,6 @@ export default function App() {
             </div>
           </header>
           <main id="main" tabIndex={-1}>
-            <Hero onSearch={heroSearch} />
             <ProductTiles />
             <ClaimsBand />
             <section className="container cashback-section" id="cashback-offer" aria-labelledby="cashback-title">
@@ -616,7 +609,7 @@ export default function App() {
           
       {authOpen && <AuthModal onClose={closeAuth} />}
       {choice && <ModeChoice product={choice} onClose={() => setChoice(null)} onOnline={() => { const c = choice; setChoice(null); openOnline(c) }} onOffline={() => startOffline(choice)} />}
-      {offline && <OfflineModal type={offline} initialReg={heroReg} onClose={() => setOffline(null)} />}
+      {offline && <OfflineModal type={offline} onClose={() => setOffline(null)} />}
       {journey && <JourneyModal product={journey} onClose={() => setJourney(null)} />}
       {note && (
         <Modal title={note.title} onClose={() => setNote(null)}>

@@ -1,81 +1,15 @@
-import { useState, type FormEvent } from 'react'
-import { ArrowRight, BadgeIndianRupee, Clock3, ShieldCheck } from 'lucide-react'
-import { PlateInput, Segmented } from '../offline/parts'
-import { OFFLINE_CASHBACK, emptyForm, validateStep, type OfflineType } from '../../lib/offline'
-import { describeReg, formatReg } from '../../lib/vehicle'
+import { ArrowRight } from 'lucide-react'
 import { PRODUCTS, inr } from '../../lib/products'
-import { cn } from '../../ui'
 import cardCar from '../../assets/img/acko/card-car.webp'
 import cardAuto from '../../assets/img/stock/auto.webp'
 import cardCommercial from '../../assets/img/stock/commercial.webp'
 import cardBike from '../../assets/img/acko/card-bike.webp'
 import cardHealth from '../../assets/img/acko/card-health.webp'
 import cardTerm from '../../assets/img/acko/card-term.webp'
-import heroCar from '../../assets/img/acko/icon-car.webp'
 import fileClaim from '../../assets/img/acko/icon-file-claim.webp'
 import trackClaim from '../../assets/img/acko/icon-track-claim.webp'
 
-/** Home page top section: vehicle-number search, product tiles and claims. Clicks on [data-product] / [data-service] are handled by App. */
-
-export function Hero({ onSearch }: { onSearch: (type: OfflineType, reg: string) => void }) {
-  const [type, setType] = useState<'Car' | 'Bike'>('Car')
-  const [reg, setReg] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const info = describeReg(reg)
-
-  function submit(e: FormEvent) {
-    e.preventDefault()
-    const bad = validateStep(1, { ...emptyForm(), regNumber: reg })
-    if (bad) return setError(bad)
-    setError(null)
-    onSearch(type === 'Car' ? 'car' : 'bike', reg)
-  }
-
-  return (
-    <section className="app-root border-b border-zinc-200 bg-[#f6f8fb]" aria-labelledby="hero-title">
-      <div className="mx-auto grid max-w-[1140px] items-center gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)] lg:py-[72px]">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[.1em] text-indigo-600">Car · Bike · Health · Term</p>
-          <h1 id="hero-title" className="mt-3 text-[32px] font-semibold leading-[1.12] tracking-tight text-zinc-900 sm:text-5xl">
-            Insurance that is easy to buy and easy to manage
-          </h1>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg">
-            Compare plans online, or share your details and let our team handle the quote and paperwork. Offline requests earn up to {inr(OFFLINE_CASHBACK.car)} cashback.
-          </p>
-
-          <form onSubmit={submit} noValidate className="mt-7 max-w-xl rounded-2xl border border-zinc-200 bg-white p-4 shadow-[0_8px_30px_-12px_rgba(16,24,40,.18)] sm:p-5">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <span className="text-sm font-medium text-zinc-800">Get a quote for your</span>
-              <Segmented label="Vehicle type" value={type} options={['Car', 'Bike'] as const} onChange={setType} />
-            </div>
-            <PlateInput label={`${type} number`} placeholder="e.g. KA12S 2367" value={reg} onChange={(v) => { setReg(formatReg(v)); setError(null) }} />
-            <p className={cn('mt-2 min-h-5 text-sm', error ? 'text-rose-700' : info.ok ? 'font-medium text-emerald-700' : 'text-zinc-500')} aria-live="polite" role={error ? 'alert' : undefined}>
-              {error ?? (reg ? (info.ok ? `${info.rto ? `${info.rto} · ` : ''}${info.state}${info.complete ? '' : ' · keep typing…'}` : info.hint) : 'We format it as you type.')}
-            </p>
-            <button type="submit" className="mt-3 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 text-[15px] font-medium text-white transition-colors hover:bg-indigo-700">
-              Get quote <ArrowRight size={17} />
-            </button>
-            <p className="mt-3 text-center text-sm text-zinc-500">No registration number yet? <a href="#products" className="font-medium text-indigo-600 hover:underline">Browse all insurance</a></p>
-          </form>
-
-          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-700">
-            {([[BadgeIndianRupee, `Up to ${inr(OFFLINE_CASHBACK.car)} cashback`], [Clock3, 'We call within 24 hours'], [ShieldCheck, 'Verified mobile sign-in']] as const).map(([Icon, t]) => (
-              <li key={t} className="flex items-center gap-2"><Icon size={17} className="text-indigo-600" />{t}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="relative hidden lg:block" aria-hidden>
-          <img src={heroCar} alt="" width={600} height={336} className="w-full rounded-3xl object-cover shadow-[0_24px_60px_-20px_rgba(16,24,40,.35)]" />
-          <div className="absolute -bottom-5 -left-5 flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-lg">
-            <span className="grid size-9 place-items-center rounded-lg bg-emerald-50 text-emerald-600"><BadgeIndianRupee size={18} /></span>
-            <span className="text-sm"><b className="block font-semibold text-zinc-900">Cashback offer</b><span className="text-zinc-500">Once your policy is confirmed</span></span>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
+/** Home page product tiles and claims. Clicks on [data-product] / [data-service] are handled by App. */
 
 const TILES: Record<string, { img: string; tint: string }> = {
   car: { img: cardCar, tint: '#e9f0fb' },
